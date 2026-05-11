@@ -1,0 +1,10 @@
+<?php
+
+namespace $NAMESPACE$;
+
+use App\Models\BaseModel;
+
+abstract class $CLASS$ extends BaseModel
+{
+    //
+}

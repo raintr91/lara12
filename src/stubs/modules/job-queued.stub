@@ -1,0 +1,10 @@
+<?php
+
+namespace $NAMESPACE$;
+
+use App\Jobs\BaseJob;
+
+abstract class $CLASS$ extends BaseJob
+{
+    //
+}

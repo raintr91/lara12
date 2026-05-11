@@ -1,0 +1,22 @@
+<?php
+
+namespace $NAMESPACE$;
+
+use Database\Factories\BaseModelFactory;
+
+class $CLASS$ extends BaseModelFactory
+{
+    /**
+     * The name of the factory's corresponding model.
+     *
+     * @var class-string<\Illuminate\Database\Eloquent\Model>
+     */
+    protected $model = \$MODEL_FQCN$::class;
+
+    public function definition(): array
+    {
+        return [
+            //
+        ];
+    }
+}

@@ -1,0 +1,19 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| Module Web Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register web routes for your module.
+|
+*/
+
+Route::middleware('web')
+    ->prefix(strtolower('$STUDLY_NAME$'))
+    ->as(strtolower('$STUDLY_NAME$').'.')
+    ->group(function () {
+        //
+    });

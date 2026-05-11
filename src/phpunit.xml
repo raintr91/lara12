@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         colors="true"
+         cacheDirectory=".phpunit.cache"
+>
+    <testsuites>
+        <testsuite name="Root">
+            <directory>tests/Unit</directory>
+            <directory>tests/Feature</directory>
+            <exclude>tests/Unit/Console/Commands</exclude>
+            <exclude>tests/Unit/Models/BaseModelTest.php</exclude>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <directory suffix=".php">app</directory>
+            <directory suffix=".php">Modules</directory>
+        </include>
+        <exclude>
+            <directory suffix=".php">app/Console/Commands</directory>
+            <directory suffix="Test.php">Modules</directory>
+        </exclude>
+    </source>
+    <coverage includeUncoveredFiles="true">
+        <report>
+            <html outputDirectory="coverage"/>
+            <text outputFile="php://stdout" showUncoveredFiles="false"/>
+        </report>
+    </coverage>
+    <php>
+        <env name="APP_ENV" value="testing"/>
+        <!-- Tránh ghi stderr (testing.ERROR: …) khi Handler::serverError gọi report(); không đổi logic test. -->
+        <env name="LOG_CHANNEL" value="array"/>
+        <ini name="pcov.enabled" value="1"/>
+        <ini name="pcov.directory" value="."/>
+        <ini name="pcov.exclude" value="~vendor|coverage~"/>
+    </php>
+</phpunit>

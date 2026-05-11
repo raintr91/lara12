@@ -1,0 +1,4 @@
+# Legacy nếu còn file cũ
+.env.docker
+prod/.env
+stg/.env

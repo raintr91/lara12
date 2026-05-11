@@ -1,0 +1,17 @@
+<?php
+
+namespace $NAMESPACE$;
+
+use $MODULE_NAMESPACE$\$MODULE$\Http\Requests\$MODULE$Request;
+
+class RegisterRequest extends $MODULE$Request
+{
+    public function rules(): array
+    {
+        return [
+            'name' => ['nullable', 'string', 'max:255'],
+            'email' => ['required', 'email'],
+            'password' => ['required', 'string', 'min:6'],
+        ];
+    }
+}

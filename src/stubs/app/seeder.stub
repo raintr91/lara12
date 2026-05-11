@@ -1,0 +1,15 @@
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use App\Models\$MODEL_CLASS$;
+
+class $CLASS$ extends Seeder
+{
+    public function run(): void
+    {
+        // Example:
+        // $MODEL_CLASS$::factory()->count(10)->create();
+    }
+}

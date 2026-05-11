@@ -1,0 +1,18 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| Module API Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register API routes for your module.
+|
+*/
+
+Route::prefix(strtolower('$STUDLY_NAME$'))
+    ->as(strtolower('$STUDLY_NAME$').'.')
+    ->group(function () {
+        // Route::get('/', [\$MODULE_NAMESPACE$\$STUDLY_NAME$\Http\Controllers\Controller::class, 'index']);
+    });

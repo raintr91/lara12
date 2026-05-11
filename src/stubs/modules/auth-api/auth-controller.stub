@@ -1,0 +1,131 @@
+<?php
+
+namespace $NAMESPACE$;
+
+use $MODEL_FQCN$;
+use $MODULE_NAMESPACE$\$MODULE$\Http\Controllers\$MODULE$Controller;
+use $MODULE_NAMESPACE$\$MODULE$\Http\Requests\Auth\ChangePasswordRequest;
+use $MODULE_NAMESPACE$\$MODULE$\Http\Requests\Auth\ForgotPasswordRequest;
+use $MODULE_NAMESPACE$\$MODULE$\Http\Requests\Auth\LoginRequest;
+use $MODULE_NAMESPACE$\$MODULE$\Http\Requests\Auth\RegisterRequest;
+use $MODULE_NAMESPACE$\$MODULE$\Http\Requests\Auth\ResetPasswordRequest;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
+
+class AuthController extends $MODULE$Controller
+{
+    public function register(RegisterRequest $request)
+    {
+        $data = $request->validated();
+
+        $existing = $this->newUserQuery()->where('email', $data['email'])->first();
+        if ($existing) {
+            return $this->error('Email already exists.', 422, ['email' => ['Email already exists.']]);
+        }
+
+        /** @var $MODEL_CLASS$ $user */
+        $user = $this->newUserQuery()->create([
+            'name' => $data['name'] ?? Str::before($data['email'], '@'),
+            'email' => $data['email'],
+            'password' => Hash::make($data['password']),
+        ]);
+
+        return $this->success([
+            'user' => $user,
+            'token' => $this->maybeIssueToken($user),
+        ], 'Registered');
+    }
+
+    public function login(LoginRequest $request)
+    {
+        $data = $request->validated();
+
+        $user = $this->newUserQuery()->where('email', $data['email'])->first();
+        if (! $user || ! Hash::check($data['password'], $user->password)) {
+            return $this->error('Invalid credentials.', 401);
+        }
+
+        return $this->success([
+            'user' => $user,
+            'token' => $this->maybeIssueToken($user),
+        ], 'Logged in');
+    }
+
+    public function logout(Request $request)
+    {
+        $user = $request->user();
+
+        if ($user && method_exists($user, 'currentAccessToken') && $user->currentAccessToken()) {
+            $user->currentAccessToken()->delete();
+        }
+
+        return $this->success(null, 'Logged out');
+    }
+
+    public function forgotPassword(ForgotPasswordRequest $request)
+    {
+        // Uses Laravel password broker (make sure auth + password broker config matches your user model)
+        $status = Password::sendResetLink($request->only('email'));
+
+        if ($status === Password::RESET_LINK_SENT) {
+            return $this->success(null, __($status));
+        }
+
+        return $this->error(__($status), 422);
+    }
+
+    public function resetPassword(ResetPasswordRequest $request)
+    {
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function ($user, $password) {
+                $user->password = Hash::make($password);
+                $user->setRememberToken(Str::random(60));
+                $user->save();
+            }
+        );
+
+        if ($status === Password::PASSWORD_RESET) {
+            return $this->success(null, __($status));
+        }
+
+        return $this->error(__($status), 422);
+    }
+
+    public function changePassword(ChangePasswordRequest $request, Request $httpRequest)
+    {
+        $user = $httpRequest->user();
+        if (! $user) {
+            return $this->error('Unauthenticated.', 401);
+        }
+
+        $data = $request->validated();
+        if (! Hash::check($data['current_password'], $user->password)) {
+            return $this->error('Current password is incorrect.', 422, [
+                'current_password' => ['Current password is incorrect.'],
+            ]);
+        }
+
+        $user->password = Hash::make($data['password']);
+        $user->save();
+
+        return $this->success(null, 'Password changed');
+    }
+
+    private function newUserQuery()
+    {
+        return $MODEL_CLASS$::query();
+    }
+
+    private function maybeIssueToken($user): ?string
+    {
+        // If Laravel Sanctum is installed + model uses HasApiTokens, this will return a token.
+        if (method_exists($user, 'createToken')) {
+            return $user->createToken('api')->plainTextToken;
+        }
+
+        return null;
+    }
+}

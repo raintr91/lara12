@@ -1,0 +1,153 @@
+{
+    "$schema": "https://getcomposer.org/schema.json",
+    "name": "laravel/laravel",
+    "type": "project",
+    "description": "The skeleton application for the Laravel framework.",
+    "keywords": [
+        "laravel",
+        "framework"
+    ],
+    "license": "MIT",
+    "require": {
+        "php": "^8.2",
+        "barryvdh/laravel-dompdf": "^3.1",
+        "laravel/framework": "^12.0",
+        "laravel/sanctum": "^4.1",
+        "laravel/tinker": "^2.10.1",
+        "nwidart/laravel-modules": "*"
+    },
+    "require-dev": {
+        "fakerphp/faker": "^1.23",
+        "laravel/pail": "^1.2.2",
+        "laravel/pint": "^1.24",
+        "laravel/sail": "^1.41",
+        "mockery/mockery": "^1.6",
+        "nunomaduro/collision": "^8.6",
+        "phpunit/phpunit": "^11.5.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/",
+            "Modules\\": "Modules/",
+            "Database\\Factories\\": "database/factories/",
+            "Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "setup": [
+            "composer install",
+            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
+            "@php artisan key:generate",
+            "@php artisan migrate --force",
+            "npm install",
+            "npm run build"
+        ],
+        "dev": [
+            "Composer\\Config::disableProcessTimeout",
+            "npx concurrently -c \"#93c5fd,#c4b5fd,#fb7185,#fdba74\" \"php artisan serve\" \"php artisan queue:listen --tries=1 --timeout=0\" \"php artisan pail --timeout=0\" \"npm run dev\" --names=server,queue,logs,vite --kill-others"
+        ],
+        "test": [
+            "@php artisan config:clear --ansi --env=testing",
+            "@php artisan test --env=testing"
+        ],
+        "test:root": [
+            "@php artisan config:clear --ansi --env=testing",
+            "@php artisan test --env=testing --testsuite=Root"
+        ],
+        "test:module:admin": [
+            "@php artisan config:clear --ansi --env=testing",
+            "@php artisan test --env=testing --testsuite=ModuleAdmin"
+        ],
+        "test:module:store": [
+            "@php artisan config:clear --ansi --env=testing",
+            "@php artisan test --env=testing --testsuite=ModuleStore"
+        ],
+        "test:modules": [
+            "@php artisan config:clear --ansi --env=testing",
+            "@php artisan test --env=testing --testsuite=ModuleAdmin",
+            "@php artisan test --env=testing --testsuite=ModuleStore"
+        ],
+        "test:coverage": [
+            "Composer\\Config::disableProcessTimeout",
+            "@php artisan config:clear --ansi --env=testing",
+            "PHP_INI_SCAN_DIR=/etc/php/8.4/cli/conf.d:/home/vutv/prj/demo_unittest/api/phpconf php artisan test --env=testing --coverage"
+        ],
+        "test:coverage:root-html": [
+            "Composer\\Config::disableProcessTimeout",
+            "@php artisan config:clear --ansi --env=testing",
+            "rm -rf coverage-root",
+            "PHP_INI_SCAN_DIR=/etc/php/8.4/cli/conf.d:/home/vutv/prj/demo_unittest/api/phpconf php artisan test --env=testing --testsuite=Root --coverage-html=coverage-root"
+        ],
+        "test:coverage:root-text": [
+            "Composer\\Config::disableProcessTimeout",
+            "@php artisan config:clear --ansi --env=testing",
+            "PHP_INI_SCAN_DIR=/etc/php/8.4/cli/conf.d:/home/vutv/prj/demo_unittest/api/phpconf php artisan test --env=testing --testsuite=Root --coverage-text"
+        ],
+        "test:coverage:module:admin-html": [
+            "Composer\\Config::disableProcessTimeout",
+            "@php artisan config:clear --ansi --env=testing",
+            "rm -rf coverage/module-admin",
+            "PHP_INI_SCAN_DIR=/etc/php/8.4/cli/conf.d:/home/vutv/prj/demo_unittest/api/phpconf php artisan test --env=testing --testsuite=ModuleAdmin --coverage-filter=Modules/Admin --coverage-html=coverage/module-admin"
+        ],
+        "test:coverage:module:store-html": [
+            "Composer\\Config::disableProcessTimeout",
+            "@php artisan config:clear --ansi --env=testing",
+            "rm -rf coverage/module-store",
+            "PHP_INI_SCAN_DIR=/etc/php/8.4/cli/conf.d:/home/vutv/prj/demo_unittest/api/phpconf php artisan test --env=testing --testsuite=ModuleStore --coverage-filter=Modules/Store --coverage-html=coverage/module-store"
+        ],
+        "test:coverage:module:chain-html": [
+            "Composer\\Config::disableProcessTimeout",
+            "@php artisan config:clear --ansi --env=testing",
+            "rm -rf coverage/module-chain",
+            "PHP_INI_SCAN_DIR=/usr/local/etc/php/conf.d:/var/www/api/phpconf php artisan test --env=testing --testsuite=ModuleChain --coverage-filter=Modules/Chain --coverage-html=coverage/module-chain"
+        ],
+        "test:coverage:modules-html": [
+            "Composer\\Config::disableProcessTimeout",
+            "@php artisan config:clear --ansi --env=testing",
+            "rm -rf coverage/module-admin coverage/module-store coverage/module-promptcheck",
+            "PHP_INI_SCAN_DIR=/etc/php/8.4/cli/conf.d:/home/vutv/prj/demo_unittest/api/phpconf php artisan test --env=testing --testsuite=ModuleAdmin --coverage-filter=Modules/Admin --coverage-html=coverage/module-admin",
+            "PHP_INI_SCAN_DIR=/etc/php/8.4/cli/conf.d:/home/vutv/prj/demo_unittest/api/phpconf php artisan test --env=testing --testsuite=ModuleStore --coverage-filter=Modules/Store --coverage-html=coverage/module-store",
+            "PHP_INI_SCAN_DIR=/etc/php/8.4/cli/conf.d:/home/vutv/prj/demo_unittest/api/phpconf php artisan test --env=testing --testsuite=ModulePromptcheck --coverage-filter=Modules/Promptcheck --coverage-html=coverage/module-promptcheck"
+        ],
+        "post-autoload-dump": [
+            "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
+            "@php artisan package:discover --ansi"
+        ],
+        "post-update-cmd": [
+            "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
+        ],
+        "post-root-package-install": [
+            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
+        ],
+        "post-create-project-cmd": [
+            "@php artisan key:generate --ansi",
+            "@php -r \"file_exists('database/database.sqlite') || touch('database/database.sqlite');\"",
+            "@php artisan migrate --graceful --ansi"
+        ],
+        "pre-package-uninstall": [
+            "Illuminate\\Foundation\\ComposerScripts::prePackageUninstall"
+        ]
+    },
+    "extra": {
+        "laravel": {
+            "dont-discover": []
+        }
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true,
+            "php-http/discovery": true,
+            "wikimedia/composer-merge-plugin": true
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

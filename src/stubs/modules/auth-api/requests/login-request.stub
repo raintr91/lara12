@@ -1,0 +1,16 @@
+<?php
+
+namespace $NAMESPACE$;
+
+use $MODULE_NAMESPACE$\$MODULE$\Http\Requests\$MODULE$Request;
+
+class LoginRequest extends $MODULE$Request
+{
+    public function rules(): array
+    {
+        return [
+            'email' => ['required', 'email'],
+            'password' => ['required', 'string'],
+        ];
+    }
+}

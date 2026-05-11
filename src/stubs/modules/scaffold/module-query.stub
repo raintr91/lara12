@@ -1,0 +1,11 @@
+<?php
+
+namespace $MODULE_NAMESPACE$\$STUDLY_NAME$\Http\Queries;
+
+use App\Http\Queries\BaseQuery;
+use Illuminate\Database\Eloquent\Builder;
+
+abstract class $STUDLY_NAME$Query extends BaseQuery
+{
+    // Implement `newQuery(): Builder` in concrete queries.
+}

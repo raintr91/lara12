@@ -1,0 +1,12 @@
+<?php
+
+namespace Modules\$MODULE$\Http\Controllers;
+
+use Modules\$MODULE$\Http\Controllers\$BASE_CONTROLLER$;
+$EXTRA_IMPORTS$
+
+class $CONTROLLER$ extends $BASE_CONTROLLER$
+{
+$CLASS_TRAITS$
+    // ...
+}

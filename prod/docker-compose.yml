@@ -1,0 +1,25 @@
+services:
+  php:
+    container_name: scenario-survey-service-php
+    build:
+      context: ../
+      dockerfile: ./prod/php/Dockerfile
+      args:
+        COMPOSER_GITHUB_TOKEN: ${COMPOSER_GITHUB_TOKEN:-}
+    volumes:
+      - ../src:/var/www/laravel
+    depends_on:
+      - db
+
+  nginx:
+    image: nginx
+    container_name: scenario-survey-service-nginx
+    build:
+      context: ../
+      dockerfile: ./prod/nginx/Dockerfile
+    ports:
+      - "80:80"
+    volumes:
+      - ../src:/var/www/laravel
+    depends_on:
+      - php

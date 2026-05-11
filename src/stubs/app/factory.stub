@@ -1,0 +1,21 @@
+<?php
+
+namespace Database\Factories;
+
+use Database\Factories\BaseModelFactory;
+use App\Models\$MODEL_CLASS$;
+
+class $CLASS$ extends BaseModelFactory
+{
+    /**
+     * @var class-string<\Illuminate\Database\Eloquent\Model>
+     */
+    protected $model = $MODEL_CLASS$::class;
+
+    public function definition(): array
+    {
+        return [
+            //
+        ];
+    }
+}

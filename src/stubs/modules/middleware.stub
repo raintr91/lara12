@@ -1,0 +1,10 @@
+<?php
+
+namespace $NAMESPACE$;
+
+use App\Http\Middleware\BaseMiddleware;
+
+abstract class $CLASS$ extends BaseMiddleware
+{
+    //
+}

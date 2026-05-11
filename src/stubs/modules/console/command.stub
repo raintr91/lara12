@@ -1,0 +1,19 @@
+<?php
+
+namespace $MODULE_NAMESPACE$\$STUDLY_NAME$\Console\Commands;
+
+use Illuminate\Console\Command;
+
+class Command extends Command
+{
+    protected $signature = strtolower('$STUDLY_NAME$').':command';
+
+    protected $description = 'Module command for $STUDLY_NAME$';
+
+    public function handle(): int
+    {
+        $this->info('Command executed.');
+
+        return self::SUCCESS;
+    }
+}

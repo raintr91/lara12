@@ -1,0 +1,13 @@
+<?php
+
+namespace $MODULE_NAMESPACE$\$STUDLY_NAME$\Http\Requests;
+
+use App\Http\Requests\BaseRequest;
+
+abstract class $STUDLY_NAME$Request extends BaseRequest
+{
+    public function rules(): array
+    {
+        return [];
+    }
+}

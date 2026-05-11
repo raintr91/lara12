@@ -1,0 +1,15 @@
+<?php
+
+namespace $NAMESPACE$;
+
+use App\Http\Requests\SelectItemRequest;
+
+class $CLASS$ extends SelectItemRequest
+{
+    /**
+     * Set the model used by this select endpoint.
+     *
+     * @var class-string<\Illuminate\Database\Eloquent\Model>
+     */
+    protected string $model = $MODEL_FQN$;
+}

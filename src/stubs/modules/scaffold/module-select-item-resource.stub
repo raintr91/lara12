@@ -1,0 +1,10 @@
+<?php
+
+namespace $NAMESPACE$;
+
+use App\Http\Resources\SelectItemResource;
+
+class $CLASS$ extends SelectItemResource
+{
+    // Override to customize output if needed.
+}

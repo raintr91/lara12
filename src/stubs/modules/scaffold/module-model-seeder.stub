@@ -1,0 +1,14 @@
+<?php
+
+namespace $NAMESPACE$;
+
+use Illuminate\Database\Seeder;
+
+class $CLASS$ extends Seeder
+{
+    public function run(): void
+    {
+        // Example:
+        // \$MODEL_FQCN$::factory()->count(10)->create();
+    }
+}

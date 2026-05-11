@@ -1,0 +1,14 @@
+<?php
+
+namespace $NAMESPACE$;
+
+use App\Http\Resources\BaseResource;
+use Illuminate\Http\Request;
+
+abstract class $CLASS$ extends BaseResource
+{
+    protected function fields(Request $request): array
+    {
+        return [];
+    }
+}

@@ -1,0 +1,11 @@
+<?php
+
+namespace $NAMESPACE$;
+
+class $CLASS$ extends $BASE_CLASS$
+{
+    protected function run(...$args): mixed
+    {
+        throw new \BadMethodCallException(static::class.'::run() is not implemented yet.');
+    }
+}

@@ -1,0 +1,16 @@
+<?php
+
+namespace $MODULE_NAMESPACE$\$STUDLY_NAME$\Http\Queries;
+
+class Query
+{
+    /**
+     * Execute the query.
+     *
+     * @return void
+     */
+    public function execute()
+    {
+        // TODO: Implement query logic
+    }
+}

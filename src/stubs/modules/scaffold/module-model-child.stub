@@ -1,0 +1,9 @@
+<?php
+
+namespace $NAMESPACE$;
+
+class $CLASS$ extends $BASE_CLASS$
+{
+$FACTORY_METHOD$
+    //
+}

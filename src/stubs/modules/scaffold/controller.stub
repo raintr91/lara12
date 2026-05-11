@@ -1,0 +1,10 @@
+<?php
+
+namespace $MODULE_NAMESPACE$\$STUDLY_NAME$\Http\Controllers;
+
+use Illuminate\Routing\Controller as BaseController;
+
+class Controller extends BaseController
+{
+    // Base controller for module: $STUDLY_NAME$
+}
