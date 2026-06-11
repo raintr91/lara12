@@ -59,6 +59,7 @@ class MakeModuleControllerCommandTest extends TestCase
                 'wire-delete' => 'yes',
                 'wire-search' => 'no',
                 'wire-detail' => 'yes',
+                'wire-multiple-delete' => 'no',
             ];
 
             public function hasOption($name): bool
@@ -86,10 +87,49 @@ class MakeModuleControllerCommandTest extends TestCase
         $this->assertSame(['delete', 'detail'], $actions);
     }
 
+    public function test_ask_actions_to_wire_honors_wire_multiple_delete_option(): void
+    {
+        $command = new class extends MakeModuleControllerCommand {
+            private array $optionValues = [
+                'yes' => false,
+                'skip-questions' => true,
+                'wire-create' => 'no',
+                'wire-update' => 'no',
+                'wire-delete' => 'no',
+                'wire-search' => 'no',
+                'wire-detail' => 'no',
+                'wire-multiple-delete' => 'yes',
+            ];
+
+            public function hasOption($name): bool
+            {
+                return array_key_exists($name, $this->optionValues);
+            }
+
+            public function option($key = null)
+            {
+                if ($key === null) {
+                    return $this->optionValues;
+                }
+
+                return $this->optionValues[$key] ?? null;
+            }
+        };
+
+        $files = $this->mockFiles(true, false);
+
+        $method = new ReflectionMethod(MakeModuleControllerCommand::class, 'askActionsToWire');
+        $method->setAccessible(true);
+
+        $actions = $method->invoke($command, $files, '/tmp/action.php', '/tmp/query.php');
+
+        $this->assertSame(['bulk-delete'], $actions);
+    }
+
     public function test_ask_actions_to_wire_interactive_uses_confirm_answers(): void
     {
         $command = new class extends MakeModuleControllerCommand {
-            private array $answers = [true, false, true, false, true];
+            private array $answers = [true, false, true, false, true, false];
 
             public function confirm($question, $default = false): bool
             {
@@ -142,6 +182,7 @@ class MakeModuleControllerCommandTest extends TestCase
             '--wire-delete' => 'no',
             '--wire-search' => 'no',
             '--wire-detail' => 'no',
+            '--wire-multiple-delete' => 'no',
             '--select-items' => 'no',
             '--skip-questions' => true,
             '--controller-test-layer' => 'unit',
@@ -206,6 +247,7 @@ class MakeModuleControllerCommandTest extends TestCase
             '--wire-delete' => 'no',
             '--wire-search' => 'no',
             '--wire-detail' => 'no',
+            '--wire-multiple-delete' => 'no',
             '--select-items' => 'no',
             '--skip-questions' => true,
         ])->assertExitCode(0);

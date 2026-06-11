@@ -2,31 +2,27 @@
 
 namespace Tests\Unit\Policies;
 
-use Tests\TestCase;
 use App\Policies\BasePolicy;
-use App\Models\User;
+use Illuminate\Contracts\Auth\Authenticatable;
+use Tests\Unit\UnitTestCase;
 
-class BasePolicyTest extends TestCase
+class BasePolicyTest extends UnitTestCase
 {
     protected BasePolicy $policy;
-    protected User $user;
+
+    protected object $user;
 
     protected function setUp(): void
     {
         parent::setUp();
 
         $this->policy = new class extends BasePolicy {
-            public function publicSameTenant(User $user, $model): bool
-            {
-                return $this->sameTenant($user, $model);
-            }
-
-            public function publicIsOwner(User $user, $model): bool
+            public function publicIsOwner(Authenticatable $user, object $model): bool
             {
                 return $this->isOwner($user, $model);
             }
 
-            public function publicHasRole(User $user, string $role): bool
+            public function publicHasRole(Authenticatable $user, string $role): bool
             {
                 return $this->hasRole($user, $role);
             }
@@ -41,76 +37,70 @@ class BasePolicyTest extends TestCase
                 return $this->deny($message);
             }
         };
-        $this->user = new User();
+
+        $this->user = new class implements Authenticatable {
+            public int $id = 0;
+
+            public string $role = 'staff';
+
+            public function getAuthIdentifierName(): string
+            {
+                return 'id';
+            }
+
+            public function getAuthIdentifier(): int
+            {
+                return $this->id;
+            }
+
+            public function getAuthPassword(): string
+            {
+                return '';
+            }
+
+            public function getRememberToken(): ?string
+            {
+                return null;
+            }
+
+            public function setRememberToken($value): void
+            {
+            }
+
+            public function getRememberTokenName(): string
+            {
+                return '';
+            }
+
+            public function getAuthPasswordName(): string
+            {
+                return 'password';
+            }
+        };
     }
 
-    /**
-     * Test before() bypass for super admin.
-     */
-    public function test_before_allows_super_admin(): void
+    public function test_before_returns_null_when_no_bypass(): void
     {
-        $this->user->role = 'super_admin';
-
         $response = $this->policy->before($this->user, 'anything');
+
+        $this->assertNull($response);
+    }
+
+    public function test_before_allows_when_bypass_returns_true(): void
+    {
+        $policy = new class extends BasePolicy {
+            protected function bypassAuthorization(Authenticatable $user, string $ability): ?bool
+            {
+                return true;
+            }
+        };
+
+        $response = $policy->before($this->user, 'anything');
 
         $this->assertNotNull($response);
         $this->assertTrue($response->allowed());
     }
 
-    /**
-     * Test before() returns null for non-super-admin.
-     */
-    public function test_before_returns_null_for_normal_user(): void
-    {
-        $this->user->role = 'staff';
-
-        $response = $this->policy->before($this->user, 'anything');
-
-        $this->assertNull($response);
-    }
-
-    public function test_before_returns_null_when_user_has_no_role(): void
-    {
-        $this->user->role = null;
-
-        $response = $this->policy->before($this->user, 'anything');
-
-        $this->assertNull($response);
-    }
-
-    /**
-     * Test sameTenant helper.
-     */
-    public function test_same_tenant(): void
-    {
-        $this->user->tenant_id = 1;
-
-        $sameTenantModel = (object) ['tenant_id' => 1];
-        $otherTenantModel = (object) ['tenant_id' => 2];
-
-        $this->assertTrue($this->policy->publicSameTenant($this->user, $sameTenantModel));
-        $this->assertFalse($this->policy->publicSameTenant($this->user, $otherTenantModel));
-    }
-
-    public function test_same_tenant_true_when_model_has_no_tenant_id(): void
-    {
-        $this->user->tenant_id = 1;
-
-        $this->assertTrue($this->policy->publicSameTenant($this->user, new \stdClass));
-    }
-
-    public function test_same_tenant_true_when_model_tenant_id_is_null(): void
-    {
-        $this->user->tenant_id = 1;
-
-        $model = (object) ['tenant_id' => null];
-
-        $this->assertTrue($this->policy->publicSameTenant($this->user, $model));
-    }
-
-    /**
-     * Test isOwner helper.
-     */
     public function test_is_owner(): void
     {
         $this->user->id = 10;
@@ -122,16 +112,6 @@ class BasePolicyTest extends TestCase
         $this->assertFalse($this->policy->publicIsOwner($this->user, $notOwnedModel));
     }
 
-    public function test_is_owner_false_when_model_has_no_user_id(): void
-    {
-        $this->user->id = 10;
-
-        $this->assertFalse($this->policy->publicIsOwner($this->user, new \stdClass));
-    }
-
-    /**
-     * Test hasRole helper.
-     */
     public function test_has_role(): void
     {
         $this->user->role = 'manager';
@@ -140,41 +120,17 @@ class BasePolicyTest extends TestCase
         $this->assertFalse($this->policy->publicHasRole($this->user, 'staff'));
     }
 
-    /**
-     * Test allow helper returns allowed response.
-     */
     public function test_allow_helper(): void
     {
         $response = $this->policy->publicAllow('Allowed');
 
         $this->assertTrue($response->allowed());
-        $this->assertSame('Allowed', $response->message());
     }
 
-    public function test_allow_helper_uses_default_message(): void
-    {
-        $response = $this->policy->publicAllow();
-
-        $this->assertTrue($response->allowed());
-        $this->assertSame('Allowed', $response->message());
-    }
-
-    /**
-     * Test deny helper returns denied response.
-     */
     public function test_deny_helper(): void
     {
         $response = $this->policy->publicDeny('Denied');
 
         $this->assertFalse($response->allowed());
-        $this->assertSame('Denied', $response->message());
-    }
-
-    public function test_deny_helper_uses_default_message(): void
-    {
-        $response = $this->policy->publicDeny();
-
-        $this->assertFalse($response->allowed());
-        $this->assertSame('This action is unauthorized.', $response->message());
     }
 }

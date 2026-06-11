@@ -4,24 +4,28 @@ namespace Tests\Unit\Http\Controllers\Traits;
 
 use App\Http\Controllers\BaseController;
 use App\Http\Controllers\Traits\SelectItemControllerTrait;
+use App\Http\Queries\BaseQuery;
 use App\Http\Requests\SelectItemRequest;
-use Illuminate\Database\Eloquent\Model;
+use App\Http\Resources\SelectItemResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Collection;
-use RuntimeException;
-use Tests\TestCase;
+use Mockery;
+use Tests\Unit\UnitTestCase;
 
-class SelectItemControllerTraitTest extends TestCase
+class SelectItemControllerTraitTest extends UnitTestCase
 {
+    protected function tearDown(): void
+    {
+        Mockery::close();
+        parent::tearDown();
+    }
+
     public function test_get_list_select_returns_success_payload(): void
     {
         $controller = new class extends BaseController {
             use SelectItemControllerTrait;
 
-            protected function selectItemQueryClass(): string
-            {
-                return SelectItemControllerQueryWithMethod::class;
-            }
+            public BaseQuery $query;
 
             protected function selectItemResourceClass(): string
             {
@@ -29,67 +33,67 @@ class SelectItemControllerTraitTest extends TestCase
             }
         };
 
-        $request = new class extends SelectItemRequest {
-            protected string $model = SelectItemControllerDummyModel::class;
-        };
+        $request = Mockery::mock(SelectItemRequest::class);
+        $items = collect([
+            ['value' => 1, 'label' => 'first'],
+            ['value' => 2, 'label' => 'second'],
+        ]);
+
+        $controller->query = Mockery::mock(BaseQuery::class);
+        $controller->query->shouldReceive('getListSelectItems')
+            ->once()
+            ->with($request)
+            ->andReturn($items);
 
         $response = $controller->getListSelect($request);
         $data = json_decode($response->getContent(), true);
 
         $this->assertSame(200, $response->getStatusCode());
         $this->assertTrue($data['success']);
-        $this->assertSame('Retrieved successfully', $data['message']);
         $this->assertCount(2, $data['data']);
         $this->assertSame('first', $data['data'][0]['label']);
     }
 
-    public function test_get_list_select_throws_when_query_does_not_define_method(): void
+    public function test_get_list_select_uses_default_select_item_resource(): void
     {
         $controller = new class extends BaseController {
             use SelectItemControllerTrait;
 
-            protected function selectItemQueryClass(): string
-            {
-                return SelectItemControllerQueryWithoutMethod::class;
-            }
+            public BaseQuery $query;
         };
 
-        $request = new class extends SelectItemRequest {
-            protected string $model = SelectItemControllerDummyModel::class;
+        $request = new class extends \App\Http\Requests\SelectItemRequest {
+            protected string $model = SelectItemControllerFakeModel::class;
         };
+        $request->replace(['key' => 'id', 'name' => ['name']]);
 
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('missing method getListSelectItems()');
+        $controller->query = Mockery::mock(BaseQuery::class);
+        $controller->query->shouldReceive('getListSelectItems')
+            ->once()
+            ->with($request)
+            ->andReturn(collect([
+                ['id' => 10, 'name' => 'Ten'],
+            ]));
 
-        $controller->getListSelect($request);
+        $response = $controller->getListSelect($request);
+        $data = json_decode($response->getContent(), true);
+
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertTrue($data['success']);
+        $this->assertSame(10, $data['data'][0]['key']);
+        $this->assertSame('Ten', $data['data'][0]['name']);
+
+        $method = new \ReflectionMethod($controller, 'selectItemResourceClass');
+        $method->setAccessible(true);
+        $this->assertSame(SelectItemResource::class, $method->invoke($controller));
     }
 }
 
-class SelectItemControllerDummyModel extends Model
+class SelectItemControllerFakeModel extends \Illuminate\Database\Eloquent\Model
 {
     protected $fillable = ['name'];
-}
 
-class SelectItemControllerQueryWithMethod
-{
-    public function __construct(private SelectItemRequest $request)
-    {
-    }
-
-    public function getListSelectItems(): Collection
-    {
-        return collect([
-            ['value' => 1, 'label' => 'first'],
-            ['value' => 2, 'label' => 'second'],
-        ]);
-    }
-}
-
-class SelectItemControllerQueryWithoutMethod
-{
-    public function __construct(private SelectItemRequest $request)
-    {
-    }
+    public $timestamps = false;
 }
 
 class SelectItemControllerResource extends JsonResource

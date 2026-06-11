@@ -4,9 +4,9 @@ namespace Tests\Unit\Http\Middleware;
 
 use App\Http\Middleware\ContentTypeVerify;
 use Illuminate\Http\Request;
-use Tests\TestCase;
+use Tests\Unit\UnitTestCase;
 
-class ContentTypeVerifyTest extends TestCase
+class ContentTypeVerifyTest extends UnitTestCase
 {
     private ContentTypeVerify $middleware;
 

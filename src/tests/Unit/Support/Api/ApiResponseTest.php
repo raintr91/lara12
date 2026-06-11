@@ -4,12 +4,12 @@ namespace Tests\Unit\Support\Api;
 
 use App\Support\Api\ApiResponse;
 use App\Support\Api\ApiError;
-use Tests\TestCase;
+use Tests\Unit\UnitTestCase;
 
 /**
  * ApiResponse — pure static helper, không cần DB / mock.
  */
-class ApiResponseTest extends TestCase
+class ApiResponseTest extends UnitTestCase
 {
     // ------------------------------------------------------------------
     // successPayload

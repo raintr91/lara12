@@ -2,10 +2,10 @@
 
 namespace Tests\Unit\Http\Controllers;
 
-use Tests\TestCase;
+use Tests\Unit\UnitTestCase;
 use App\Http\Controllers\BaseController;
 
-class BaseControllerTest extends TestCase
+class BaseControllerTest extends UnitTestCase
 {
     protected BaseController $controller;
 

@@ -12,7 +12,7 @@ abstract class BaseAction
     /**
      * @return array<string, mixed>
      */
-    protected function buildControlPayload(array $data): array
+    protected function transformPayload(array $data): array
     {
         return $data;
     }
@@ -27,7 +27,7 @@ abstract class BaseAction
 
         return $this->transaction(function () use ($id, $attributes) {
                 $model = $this->model::query()->findOrFail($id);
-                $model->update($this->buildControlPayload($attributes));
+                $model->update($this->transformPayload($attributes));
 
                 return $model->refresh();
             });

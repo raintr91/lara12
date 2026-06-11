@@ -2,13 +2,72 @@
 
 namespace Tests\Unit\Http\Resources;
 
-use Tests\TestCase;
+use App\Http\Requests\SelectItemRequest;
+use Tests\Unit\UnitTestCase;
 use App\Http\Resources\SelectItemResource;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 
-class SelectItemResourceTest extends TestCase
+class SelectItemResourceTest extends UnitTestCase
 {
+    public function test_resource_builds_single_name_field_from_string_param(): void
+    {
+        $item = new SelectItemResourceItemModel();
+        $item->setAttribute('id', 12);
+        $item->setAttribute('name', 'Item C');
+
+        $request = new Request([
+            'key' => 'id',
+            'name' => 'name',
+        ]);
+
+        $data = (new SelectItemResource($item))->toArray($request);
+
+        $this->assertSame(12, $data['key']);
+        $this->assertSame('Item C', $data['name']);
+        $this->assertSame([], $data['info']);
+    }
+
+    public function test_resource_uses_select_item_request_name_fields(): void
+    {
+        $item = new SelectItemResourceItemModel();
+        $item->setAttribute('id', 13);
+        $item->setAttribute('code', 'I-02');
+        $item->setAttribute('name', 'Item D');
+
+        $request = new class extends SelectItemRequest {
+            protected string $model = SelectItemResourceItemModel::class;
+        };
+        $request->replace([
+            'key' => 'id',
+            'name' => 'code',
+        ]);
+
+        $data = (new SelectItemResource($item))->toArray($request);
+
+        $this->assertSame(13, $data['key']);
+        $this->assertSame('I-02', $data['name']);
+    }
+
+    public function test_resource_builds_string_info_param(): void
+    {
+        $item = new SelectItemResourceItemModel();
+        $item->setAttribute('id', 14);
+        $item->setAttribute('name', 'Item E');
+        $item->setAttribute('type', 'demo');
+
+        $request = new Request([
+            'key' => 'id',
+            'name' => 'name',
+            'info' => 'type',
+        ]);
+
+        $data = (new SelectItemResource($item))->toArray($request);
+
+        $this->assertSame('Item E', $data['name']);
+        $this->assertSame('demo', $data['info']['type']);
+    }
+
     public function test_resource_builds_key_name_and_info_with_multiple_name_fields(): void
     {
         $item = new SelectItemResourceItemModel();

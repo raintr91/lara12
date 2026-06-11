@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Mockery;
-use Tests\TestCase;
+use Tests\Unit\UnitTestCase;
 
 class QueryUserStub
 {
@@ -28,7 +28,7 @@ class QueryUserResource extends JsonResource
     }
 }
 
-class BaseQueryTest extends TestCase
+class BaseQueryTest extends UnitTestCase
 {
     protected function tearDown(): void
     {
@@ -246,7 +246,7 @@ class BaseQueryTest extends TestCase
             }
         };
 
-        $this->assertSame(3, $query->publicCriteriaCount());
+        $this->assertSame(1, $query->publicCriteriaCount());
     }
 
     private function makeQuery(Request $request, Builder $builder)

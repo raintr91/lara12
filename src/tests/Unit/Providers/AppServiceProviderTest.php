@@ -3,9 +3,9 @@
 namespace Tests\Unit\Providers;
 
 use App\Providers\AppServiceProvider;
-use Tests\TestCase;
+use Tests\Unit\UnitTestCase;
 
-class AppServiceProviderTest extends TestCase
+class AppServiceProviderTest extends UnitTestCase
 {
     public function test_register_calls_module_provider_register(): void
     {

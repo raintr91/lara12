@@ -9,9 +9,9 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Mockery;
 use RuntimeException;
-use Tests\TestCase;
+use Tests\Unit\UnitTestCase;
 
-class SelectItemQueryTraitTest extends TestCase
+class SelectItemQueryTraitTest extends UnitTestCase
 {
     protected function tearDown(): void
     {
@@ -38,6 +38,80 @@ class SelectItemQueryTraitTest extends TestCase
         $this->expectExceptionMessage('request must extend');
 
         $query->getListSelectItems();
+    }
+
+    public function test_get_list_select_items_accepts_passed_request_when_constructor_has_generic_request(): void
+    {
+        $selectRequest = new class extends SelectItemRequest {
+            protected string $model = SelectItemQueryDummyModel::class;
+        };
+        $selectRequest->replace([
+            'key' => 'id',
+            'name' => 'name',
+            'info' => [],
+        ]);
+
+        $builder = Mockery::mock();
+        $builder->shouldReceive('select')->once()->with(['id', 'name'])->andReturnSelf();
+        $builder->shouldReceive('orderBy')->once()->with('name')->andReturnSelf();
+        $builder->shouldReceive('get')->once()->andReturn(collect([['id' => 3, 'name' => 'C']]));
+
+        $query = new class(new \Illuminate\Http\Request(), $builder) {
+            use SelectItemQueryTrait;
+
+            public Model $model;
+
+            public function __construct(public $request, private $builder)
+            {
+                $this->model = new SelectItemQueryDummyModel();
+            }
+
+            public function applyCriteria()
+            {
+                return $this->builder;
+            }
+        };
+
+        $items = $query->getListSelectItems($selectRequest);
+
+        $this->assertSame([['id' => 3, 'name' => 'C']], $items->toArray());
+    }
+
+    public function test_get_list_select_items_supports_string_name_field(): void
+    {
+        $request = new class extends SelectItemRequest {
+            protected string $model = SelectItemQueryDummyModel::class;
+        };
+        $request->replace([
+            'key' => 'id',
+            'name' => 'name',
+            'info' => [],
+        ]);
+
+        $builder = Mockery::mock();
+        $builder->shouldReceive('select')->once()->with(['id', 'name'])->andReturnSelf();
+        $builder->shouldReceive('orderBy')->once()->with('name')->andReturnSelf();
+        $builder->shouldReceive('get')->once()->andReturn(collect([['id' => 7, 'name' => 'String Name']]));
+
+        $query = new class($request, $builder) {
+            use SelectItemQueryTrait;
+
+            public Model $model;
+
+            public function __construct(public $request, private $builder)
+            {
+                $this->model = new SelectItemQueryDummyModel();
+            }
+
+            public function applyCriteria()
+            {
+                return $this->builder;
+            }
+        };
+
+        $items = $query->getListSelectItems();
+
+        $this->assertSame([['id' => 7, 'name' => 'String Name']], $items->toArray());
     }
 
     public function test_get_list_select_items_returns_collection_with_relations(): void
@@ -75,8 +149,11 @@ class SelectItemQueryTraitTest extends TestCase
         $query = new class($request, $builder) {
             use SelectItemQueryTrait;
 
+            public Model $model;
+
             public function __construct(public $request, private $builder)
             {
+                $this->model = new SelectItemQueryDummyModel();
             }
 
             public function applyCriteria()
@@ -111,8 +188,11 @@ class SelectItemQueryTraitTest extends TestCase
         $query = new class($request, $builder) {
             use SelectItemQueryTrait;
 
+            public Model $model;
+
             public function __construct(public $request, private $builder)
             {
+                $this->model = new SelectItemQueryFlakyRelationModel();
             }
 
             public function applyCriteria()
@@ -151,8 +231,11 @@ class SelectItemQueryTraitTest extends TestCase
         $query = new class($request, $builder) {
             use SelectItemQueryTrait;
 
+            public Model $model;
+
             public function __construct(public $request, private $builder)
             {
+                $this->model = new SelectItemQueryDummyModel();
             }
 
             public function applyCriteria()
@@ -174,11 +257,10 @@ class SelectItemQueryTraitTest extends TestCase
         };
 
         $query = new SelectItemQueryTraitInspectable($request);
-
-        $model = new SelectItemQueryDummyModel();
+        $query->model = new SelectItemQueryDummyModel();
+        $model = $query->model;
 
         [$scalars, $relations, $relationFields] = $query->parseInfoPublic(
-            $model,
             ['status', 'related', 'related.name', 'missing.name', 'broken.name', 123, '']
         );
 
@@ -186,11 +268,11 @@ class SelectItemQueryTraitTest extends TestCase
         $this->assertSame(['related'], $relations);
         $this->assertSame(['related' => ['name']], $relationFields);
 
-        $this->assertTrue($query->isRelationNamePublic($model, 'related'));
-        $this->assertFalse($query->isRelationNamePublic($model, 'unknown'));
+        $this->assertTrue($query->isRelationNamePublic('related'));
+        $this->assertFalse($query->isRelationNamePublic('unknown'));
 
-        $this->assertNull($query->relationInstancePublic($model, 'unknown'));
-        $this->assertNull($query->relationInstancePublic($model, 'broken'));
+        $this->assertNull($query->relationInstancePublic('unknown'));
+        $this->assertNull($query->relationInstancePublic('broken'));
 
         $relation = $model->related();
         $defaultFields = $query->relationSelectFieldsPublic($relation, []);
@@ -256,6 +338,8 @@ class SelectItemQueryTraitInspectable
         relationInstance as public relationInstancePublic;
         relationSelectFields as public relationSelectFieldsPublic;
     }
+
+    public Model $model;
 
     public function __construct(public $request)
     {

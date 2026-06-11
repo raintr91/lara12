@@ -7,9 +7,9 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\MessageBag;
 use Mockery;
-use Tests\TestCase;
+use Tests\Unit\UnitTestCase;
 
-class BaseRequestValidationTest extends TestCase
+class BaseRequestValidationTest extends UnitTestCase
 {
     protected function tearDown(): void
     {

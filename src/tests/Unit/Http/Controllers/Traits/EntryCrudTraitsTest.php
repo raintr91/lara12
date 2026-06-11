@@ -5,15 +5,16 @@ namespace Tests\Unit\Http\Controllers\Traits;
 use App\Http\Actions\BaseAction;
 use App\Http\Controllers\BaseController;
 use App\Http\Controllers\Traits\EntryBulkDeleteTrait;
+use App\Http\Requests\BulkDeleteRequest;
 use App\Http\Controllers\Traits\EntryCreateTrait;
 use App\Http\Controllers\Traits\EntryDeleteTrait;
 use App\Http\Controllers\Traits\EntryUpdateTrait;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Request;
 use Mockery;
-use Tests\TestCase;
+use Tests\Unit\UnitTestCase;
 
-class EntryCrudTraitsTest extends TestCase
+class EntryCrudTraitsTest extends UnitTestCase
 {
     protected function tearDown(): void
     {
@@ -23,217 +24,149 @@ class EntryCrudTraitsTest extends TestCase
 
     public function test_create_success(): void
     {
-        $controller = new class extends BaseController {
-            use EntryCreateTrait;
-        };
-
-        $action = new class extends BaseAction {
-            protected function run(...$args)
-            {
-                return ['payload' => $args[0] ?? []];
-            }
-        };
-
-        $request = Mockery::mock(Request::class);
+        $controller = $this->controllerWithAction();
+        $request = Mockery::mock(FormRequest::class);
         $request->shouldReceive('validated')->once()->andReturn(['name' => 'robot']);
 
-        $response = $controller->create($action, $request);
+        $controller->action->shouldReceive('execute')->once()->with(['name' => 'robot'])->andReturn(['id' => 1]);
+
+        $response = $controller->create($request);
         $data = json_decode($response->getContent(), true);
 
-        $this->assertSame(201, $response->status());
+        $this->assertSame(201, $response->getStatusCode());
         $this->assertTrue($data['success']);
-        $this->assertSame('Created successfully', $data['message']);
-        $this->assertSame('create', $data['data']['payload']['operation']);
+        $this->assertSame(['id' => 1], $data['data']);
     }
 
     public function test_create_error(): void
     {
-        $controller = new class extends BaseController {
-            use EntryCreateTrait;
-        };
-
-        $action = new class extends BaseAction {
-            protected function run(...$args)
-            {
-                throw new \RuntimeException('create failed');
-            }
-        };
-
-        $request = Mockery::mock(Request::class);
+        $controller = $this->controllerWithAction();
+        $request = Mockery::mock(FormRequest::class);
         $request->shouldReceive('validated')->once()->andReturn(['name' => 'robot']);
+        $controller->action->shouldReceive('execute')->once()->andThrow(new \RuntimeException('create failed'));
 
-        $response = $controller->create($action, $request);
+        $response = $controller->create($request);
         $data = json_decode($response->getContent(), true);
 
-        $this->assertSame(500, $response->status());
+        $this->assertSame(500, $response->getStatusCode());
         $this->assertFalse($data['success']);
         $this->assertSame('create failed', $data['message']);
     }
 
     public function test_update_success(): void
     {
-        $controller = new class extends BaseController {
-            use EntryUpdateTrait;
-        };
-
-        $action = new class extends BaseAction {
-            protected function run(...$args)
-            {
-                return ['payload' => $args[0] ?? []];
-            }
-        };
-
-        $request = Mockery::mock(Request::class);
+        $controller = $this->controllerWithAction();
+        $request = Mockery::mock(FormRequest::class);
         $request->shouldReceive('validated')->once()->andReturn(['name' => 'robot']);
+        $controller->action->shouldReceive('update')->once()->with(55, ['name' => 'robot'])->andReturn(['id' => 55]);
 
-        $response = $controller->update($action, $request, 55);
+        $response = $controller->update($request, 55);
         $data = json_decode($response->getContent(), true);
 
-        $this->assertSame(200, $response->status());
+        $this->assertSame(200, $response->getStatusCode());
         $this->assertTrue($data['success']);
-        $this->assertSame('Updated successfully', $data['message']);
-        $this->assertSame(55, $data['data']['payload']['id']);
-        $this->assertSame('update', $data['data']['payload']['operation']);
-    }
-
-    public function test_update_error(): void
-    {
-        $controller = new class extends BaseController {
-            use EntryUpdateTrait;
-        };
-
-        $action = new class extends BaseAction {
-            protected function run(...$args)
-            {
-                throw new \RuntimeException('update failed');
-            }
-        };
-
-        $request = Mockery::mock(Request::class);
-        $request->shouldReceive('validated')->once()->andReturn(['name' => 'robot']);
-
-        $response = $controller->update($action, $request, 55);
-        $data = json_decode($response->getContent(), true);
-
-        $this->assertSame(500, $response->status());
-        $this->assertFalse($data['success']);
-        $this->assertSame('update failed', $data['message']);
+        $this->assertSame(['id' => 55], $data['data']);
     }
 
     public function test_delete_success(): void
     {
-        $controller = new class extends BaseController {
-            use EntryDeleteTrait;
-        };
+        $controller = $this->controllerWithAction();
+        $controller->action->shouldReceive('delete')->once()->with(7)->andReturnNull();
 
-        $action = new class extends BaseAction {
-            protected function run(...$args)
-            {
-                return null;
-            }
-        };
-
-        $response = $controller->delete($action, 7);
+        $response = $controller->delete(7);
         $data = json_decode($response->getContent(), true);
 
-        $this->assertSame(200, $response->status());
+        $this->assertSame(200, $response->getStatusCode());
         $this->assertTrue($data['success']);
-        $this->assertSame('Deleted successfully', $data['message']);
+        $this->assertNull($data['data']);
+    }
+
+    public function test_bulk_delete_success(): void
+    {
+        $controller = $this->controllerWithAction();
+        $controller->action->shouldReceive('bulkDelete')->once()->with([1, 2, 3])->andReturn(true);
+
+        $response = $controller->bulkDelete($this->bulkDeleteRequest([1, 2, 3]));
+        $data = json_decode($response->getContent(), true);
+
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertTrue($data['success']);
+        $this->assertTrue($data['data']);
+    }
+
+    public function test_create_uses_request_all_when_not_form_request(): void
+    {
+        $controller = $this->controllerWithAction();
+        $request = Request::create('/', 'POST', ['name' => 'plain']);
+        $controller->action->shouldReceive('execute')->once()->with(['name' => 'plain'])->andReturn(['id' => 2]);
+
+        $response = $controller->create($request);
+        $this->assertSame(201, $response->getStatusCode());
+    }
+
+    public function test_update_uses_request_all_when_not_form_request(): void
+    {
+        $controller = $this->controllerWithAction();
+        $request = Request::create('/', 'PUT', ['name' => 'plain']);
+        $controller->action->shouldReceive('update')->once()->with(4, ['name' => 'plain'])->andReturn(['id' => 4]);
+
+        $response = $controller->update($request, 4);
+        $this->assertSame(200, $response->getStatusCode());
+    }
+
+    public function test_update_error(): void
+    {
+        $controller = $this->controllerWithAction();
+        $request = Mockery::mock(FormRequest::class);
+        $request->shouldReceive('validated')->once()->andReturn(['name' => 'x']);
+        $controller->action->shouldReceive('update')->once()->andThrow(new \RuntimeException('update failed'));
+
+        $response = $controller->update($request, 1);
+        $this->assertSame(500, $response->getStatusCode());
     }
 
     public function test_delete_error(): void
     {
-        $controller = new class extends BaseController {
-            use EntryDeleteTrait;
-        };
+        $controller = $this->controllerWithAction();
+        $controller->action->shouldReceive('delete')->once()->andThrow(new \RuntimeException('delete failed'));
 
-        $action = new class extends BaseAction {
-            protected function run(...$args)
-            {
-                throw new \RuntimeException('delete failed');
-            }
-        };
-
-        $response = $controller->delete($action, 7);
-        $data = json_decode($response->getContent(), true);
-
-        $this->assertSame(500, $response->status());
-        $this->assertFalse($data['success']);
-        $this->assertSame('delete failed', $data['message']);
-    }
-
-    public function test_bulk_delete_success_with_form_request_payload(): void
-    {
-        $controller = new class extends BaseController {
-            use EntryBulkDeleteTrait;
-        };
-
-        $action = new class extends BaseAction {
-            protected function run(...$args)
-            {
-                return ['payload' => $args[0] ?? []];
-            }
-        };
-
-        $request = Mockery::mock(FormRequest::class);
-        $request->shouldReceive('validated')->once()->andReturn(['ids' => [1, 2, 3]]);
-
-        $response = $controller->bulkDelete($action, $request);
-        $data = json_decode($response->getContent(), true);
-
-        $this->assertSame(200, $response->status());
-        $this->assertTrue($data['success']);
-        $this->assertSame('Deleted successfully', $data['message']);
-        $this->assertSame('bulk_delete', $data['data']['payload']['operation']);
-        $this->assertSame([1, 2, 3], $data['data']['payload']['ids']);
-    }
-
-    public function test_bulk_delete_success_with_plain_request_payload(): void
-    {
-        $controller = new class extends BaseController {
-            use EntryBulkDeleteTrait;
-        };
-
-        $action = new class extends BaseAction {
-            protected function run(...$args)
-            {
-                return ['payload' => $args[0] ?? []];
-            }
-        };
-
-        $request = Mockery::mock(Request::class);
-        $request->shouldReceive('all')->once()->andReturn(['ids' => [9]]);
-
-        $response = $controller->bulkDelete($action, $request, 'delete_many');
-        $data = json_decode($response->getContent(), true);
-
-        $this->assertSame(200, $response->status());
-        $this->assertTrue($data['success']);
-        $this->assertSame('delete_many', $data['data']['payload']['operation']);
-        $this->assertSame([9], $data['data']['payload']['ids']);
+        $response = $controller->delete(1);
+        $this->assertSame(500, $response->getStatusCode());
     }
 
     public function test_bulk_delete_error(): void
     {
+        $controller = $this->controllerWithAction();
+        $controller->action->shouldReceive('bulkDelete')->once()->andThrow(new \RuntimeException('bulk failed'));
+
+        $response = $controller->bulkDelete($this->bulkDeleteRequest([1]));
+        $this->assertSame(500, $response->getStatusCode());
+    }
+
+    private function bulkDeleteRequest(array $ids): BulkDeleteRequest
+    {
+        $request = new class extends BulkDeleteRequest {
+        };
+        $request->merge(['ids' => $ids]);
+        $request->setContainer(app())->setRedirector(app('redirect'));
+        $request->validateResolved();
+
+        return $request;
+    }
+
+    private function controllerWithAction()
+    {
         $controller = new class extends BaseController {
+            use EntryCreateTrait;
+            use EntryUpdateTrait;
+            use EntryDeleteTrait;
             use EntryBulkDeleteTrait;
+
+            public BaseAction $action;
         };
 
-        $action = new class extends BaseAction {
-            protected function run(...$args)
-            {
-                throw new \RuntimeException('bulk delete failed');
-            }
-        };
+        $controller->action = Mockery::mock(BaseAction::class);
 
-        $request = Mockery::mock(Request::class);
-        $request->shouldReceive('all')->once()->andReturn(['ids' => [1]]);
-
-        $response = $controller->bulkDelete($action, $request);
-        $data = json_decode($response->getContent(), true);
-
-        $this->assertSame(500, $response->status());
-        $this->assertFalse($data['success']);
-        $this->assertSame('bulk delete failed', $data['message']);
+        return $controller;
     }
 }

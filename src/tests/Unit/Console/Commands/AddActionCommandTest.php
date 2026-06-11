@@ -32,6 +32,7 @@ class AddActionCommandTest extends TestCase
 
         $this->assertSame('search', $normalize->invoke($command, 'list'));
         $this->assertSame('detail', $normalize->invoke($command, 'get-detail'));
+        $this->assertSame('bulk-delete', $normalize->invoke($command, 'multiple-delete'));
         $this->assertSame('create', $normalize->invoke($command, 'create'));
         $this->assertNull($normalize->invoke($command, 'invalid'));
     }
@@ -48,13 +49,13 @@ class AddActionCommandTest extends TestCase
         $detail = $template->invoke($command, 'detail', 'UserAction', 'UserQuery', 'UserCreateRequest', 'UserSearchRequest');
 
         $this->assertStringContainsString('function create(', $create);
-        $this->assertStringContainsString('traitCreate', $create);
+        $this->assertStringContainsString('$this->action->create', $create);
 
         $this->assertStringContainsString('function search(', $search);
-        $this->assertStringContainsString('makeWith(UserQuery::class', $search);
+        $this->assertStringContainsString('$this->query->paginate', $search);
 
         $this->assertStringContainsString('function getDetail(', $detail);
-        $this->assertStringContainsString('traitGetDetail', $detail);
+        $this->assertStringContainsString('findById', $detail);
     }
 
     public function test_handle_returns_error_for_invalid_action(): void
@@ -90,7 +91,6 @@ class AddActionCommandTest extends TestCase
         $routes = $files->get(base_path("Modules/{$module}/Routes/api.php"));
 
         $this->assertStringContainsString('EntrySearchTrait', $controller);
-        $this->assertStringContainsString('function search(', $controller);
         $this->assertStringContainsString("Route::post('search'", $routes);
     }
 
@@ -174,26 +174,51 @@ class AddActionCommandTest extends TestCase
         $method = new ReflectionMethod(AddActionCommand::class, 'patchController');
         $method->setAccessible(true);
 
-        $actions = [
-            'create' => 'function create(',
-            'update' => 'function update(',
-            'delete' => 'function delete(',
-            'search' => 'function search(',
-            'detail' => 'function getDetail(',
+        $traitByAction = [
+            'create' => 'EntryCreateTrait',
+            'update' => 'EntryUpdateTrait',
+            'delete' => 'EntryDeleteTrait',
+            'bulk-delete' => 'EntryBulkDeleteTrait',
+            'search' => 'EntrySearchTrait',
+            'detail' => 'EntryDetailTrait',
         ];
 
-        foreach ($actions as $action => $needle) {
+        foreach ($traitByAction as $action => $trait) {
             $path = storage_path('framework/cache/controller-' . $action . '-' . uniqid() . '.php');
             $files->put($path, "<?php\n\nnamespace Modules\\Hook\\Http\\Controllers;\n\nclass SampleController extends HookController\n{\n}\n");
 
             $method->invoke($command, $files, $path, 'Hook', $action, 'SampleAction', 'SampleQuery', 'SampleCreateRequest', 'SampleSearchRequest');
             $contents = $files->get($path);
 
-            $this->assertStringContainsString($needle, $contents);
-            $this->assertStringContainsString('use App\\Http\\Controllers\\Traits\\Entry', $contents);
+            $this->assertStringContainsString("use {$trait};", $contents);
 
             $files->delete($path);
         }
+    }
+
+    public function test_handle_patches_controller_and_routes_for_bulk_delete_action(): void
+    {
+        $module = $this->makeModuleWithController('TmpAddBulkDelete' . uniqid());
+        $files = new Filesystem();
+
+        $files->put(base_path("Modules/{$module}/Http/Actions/SampleAction.php"), "<?php\nnamespace Modules\\{$module}\\Http\\Actions;\nclass SampleAction {}\n");
+        $files->put(base_path("Modules/{$module}/Http/Requests/SampleBulkDeleteRequest.php"), "<?php\n\nnamespace Modules\\{$module}\\Http\\Requests;\n\nuse App\\Http\\Requests\\BulkDeleteRequest;\n\nclass SampleBulkDeleteRequest extends BulkDeleteRequest\n{\n}\n");
+
+        $this->artisan('add:action', [
+            'module' => $module,
+            'controller' => 'Sample',
+            'action' => 'bulk-delete',
+            '--yes' => true,
+            '--skip-questions' => true,
+        ])->assertExitCode(0);
+
+        $controller = $files->get(base_path("Modules/{$module}/Http/Controllers/SampleController.php"));
+        $routes = $files->get(base_path("Modules/{$module}/Routes/api.php"));
+
+        $this->assertStringContainsString('EntryBulkDeleteTrait', $controller);
+        $this->assertStringContainsString('SampleBulkDeleteRequest', $controller);
+        $this->assertStringContainsString("Route::post('bulk-delete'", $routes);
+        $this->assertStringContainsString("'bulkDelete'", $routes);
     }
 
     public function test_patch_routes_adds_group_when_prefix_does_not_exist(): void

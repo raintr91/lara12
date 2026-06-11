@@ -3,12 +3,12 @@
 namespace Tests\Unit\Support\Api;
 
 use App\Support\Api\ApiError;
-use Tests\TestCase;
+use Tests\Unit\UnitTestCase;
 
 /**
  * ApiError — pure constants class, kiểm tra giá trị hằng không bị thay đổi.
  */
-class ApiErrorTest extends TestCase
+class ApiErrorTest extends UnitTestCase
 {
     public function test_http_status_constants(): void
     {

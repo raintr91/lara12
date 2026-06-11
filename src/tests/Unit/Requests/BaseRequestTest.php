@@ -2,11 +2,11 @@
 
 namespace Tests\Unit\Requests;
 
-use Tests\TestCase;
+use Tests\Unit\UnitTestCase;
 use App\Http\Requests\BaseRequest;
 use App\Support\Api\ApiError;
 
-class BaseRequestTest extends TestCase
+class BaseRequestTest extends UnitTestCase
 {
     private function makeRequest(): BaseRequest
     {
@@ -76,16 +76,17 @@ class BaseRequestTest extends TestCase
     }
 
     /**
-     * Test default validation messages.
+     * Test default validation messages use i18n keys for string length rules.
      */
     public function test_default_validation_messages(): void
     {
         $request = new BaseRequest();
         $messages = $request->messages();
 
-        $this->assertArrayHasKey('required', $messages);
-        $this->assertArrayHasKey('email', $messages);
-        $this->assertArrayHasKey('unique', $messages);
+        $this->assertArrayHasKey('min.string', $messages);
+        $this->assertArrayHasKey('max.string', $messages);
+        $this->assertSame(__('validation.min.string'), $messages['min.string']);
+        $this->assertSame(__('validation.max.string'), $messages['max.string']);
     }
 
     public function test_authorize_returns_true_when_no_authorization_required(): void

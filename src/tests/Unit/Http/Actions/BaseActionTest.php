@@ -2,24 +2,40 @@
 
 namespace Tests\Unit\Http\Actions;
 
-use Tests\TestCase;
 use App\Http\Actions\BaseAction;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Mockery;
+use Tests\Unit\UnitTestCase;
 
-class DummyActionModel extends Model
+class StubActionModel extends Model
 {
     protected $guarded = [];
+
     public $timestamps = false;
+
+    public static ?Builder $queryBuilder = null;
+
     public bool $wasDeleted = false;
+
+    public static function query(): Builder
+    {
+        return self::$queryBuilder ?? Mockery::mock(Builder::class);
+    }
 
     public static function create(array $attributes = []): static
     {
         $model = new static();
-        $model->exists = false;
+        $model->exists = true;
         $model->forceFill($attributes);
 
         return $model;
+    }
+
+    public function refresh(): static
+    {
+        return $this;
     }
 
     public function update(array $attributes = [], array $options = []): bool
@@ -37,9 +53,27 @@ class DummyActionModel extends Model
     }
 }
 
+/** Model with instance create() used by BaseAction::create(). */
+class InstanceCreateActionModel extends Model
+{
+    protected $guarded = [];
+
+    public $timestamps = false;
+
+    public function create(array $attributes = []): static
+    {
+        $model = new static();
+        $model->exists = true;
+        $model->forceFill($attributes);
+
+        return $model;
+    }
+}
+
 class FakeSyncRelation
 {
     public array $last = [];
+
     public function sync($value): void
     {
         $this->last = $value;
@@ -49,6 +83,7 @@ class FakeSyncRelation
 class FakeManyRelation
 {
     public bool $deleted = false;
+
     public array $created = [];
 
     public function delete(): void
@@ -65,6 +100,7 @@ class FakeManyRelation
 class FakeOneRelation
 {
     public array $updated = [];
+
     public function update($value): void
     {
         $this->updated = $value;
@@ -74,10 +110,13 @@ class FakeOneRelation
 class RelationActionModel extends Model
 {
     protected $guarded = [];
+
     public $timestamps = false;
 
     public FakeSyncRelation $tagsRelation;
+
     public FakeManyRelation $itemsRelation;
+
     public FakeOneRelation $profileRelation;
 
     public function tags()
@@ -96,20 +135,13 @@ class RelationActionModel extends Model
     }
 }
 
-class BaseActionTest extends TestCase
+class BaseActionTest extends UnitTestCase
 {
-    public function test_execute_delegates_to_run(): void
+    protected function tearDown(): void
     {
-        $action = new class extends BaseAction {
-            protected function run(...$args)
-            {
-                return ['args' => $args];
-            }
-        };
-
-        $result = $action->execute(['name' => 'John']);
-
-        $this->assertSame(['args' => [['name' => 'John']]], $result);
+        StubActionModel::$queryBuilder = null;
+        Mockery::close();
+        parent::tearDown();
     }
 
     public function test_transaction_returns_callback_result(): void
@@ -119,12 +151,7 @@ class BaseActionTest extends TestCase
             ->andReturnUsing(fn (callable $callback) => $callback());
 
         $action = new class extends BaseAction {
-            protected function run(...$args)
-            {
-                return null;
-            }
-
-            public function runTransaction(callable $callback)
+            public function runTransaction(callable $callback): mixed
             {
                 return $this->transaction($callback);
             }
@@ -133,49 +160,126 @@ class BaseActionTest extends TestCase
         $this->assertSame('ok', $action->runTransaction(fn () => 'ok'));
     }
 
-    public function test_create_update_and_delete_helpers(): void
+    public function test_create_model_update_model_and_delete_model_helpers(): void
     {
         $action = new class extends BaseAction {
-            protected function run(...$args)
+            public function __construct()
             {
-                return null;
+                $this->model = new StubActionModel();
             }
 
-            public function callCreate(string $modelClass, array $attributes): Model
+            public function callCreateModel(array $attributes, array $relations = []): Model
             {
-                return $this->create($modelClass, $attributes);
+                return $this->createModel($attributes, $relations);
             }
 
-            public function callUpdate(Model $model, array $attributes): Model
+            public function callUpdateModel(Model $model, array $attributes, array $relations = []): Model
             {
-                return $this->update($model, $attributes);
+                return $this->updateModel($model, $attributes, $relations);
             }
 
-            public function callDelete(Model $model): void
+            public function callDeleteModel(Model $model): void
             {
-                $this->delete($model);
+                $this->deleteModel($model);
             }
         };
 
-        $created = $action->callCreate(DummyActionModel::class, ['name' => 'Before']);
+        $created = $action->callCreateModel(['name' => 'Before']);
         $this->assertSame('Before', $created->name);
-        $this->assertFalse($created->wasDeleted);
 
-        $updated = $action->callUpdate($created, ['name' => 'After']);
+        $updated = $action->callUpdateModel($created, ['name' => 'After']);
         $this->assertSame('After', $updated->name);
 
-        $action->callDelete($updated);
+        $action->callDeleteModel($updated);
         $this->assertTrue($updated->wasDeleted);
+    }
+
+    public function test_update_delete_and_bulk_delete_use_query_builder(): void
+    {
+        DB::shouldReceive('transaction')->times(3)->andReturnUsing(fn (callable $cb) => $cb());
+
+        $builder = Mockery::mock(Builder::class);
+        $found = StubActionModel::create(['name' => 'Found']);
+
+        $builder->shouldReceive('findOrFail')->once()->with(5)->andReturn($found);
+        $builder->shouldReceive('findOrFail')->once()->with(9)->andReturn($found);
+        $builder->shouldReceive('whereIn')->once()->with('id', [1, 2])->andReturnSelf();
+        $builder->shouldReceive('delete')->once()->andReturn(2);
+
+        StubActionModel::$queryBuilder = $builder;
+
+        $action = new class extends BaseAction {
+            public function __construct()
+            {
+                $this->model = new StubActionModel();
+            }
+        };
+
+        $this->assertSame('After', $action->update(5, ['name' => 'After'])->name);
+        $this->assertNull($action->delete(9));
+        $this->assertTrue($action->bulkDelete([1, 2]));
+    }
+
+    public function test_create_delegates_to_model_instance(): void
+    {
+        $action = new class extends BaseAction {
+            public function __construct()
+            {
+                $this->model = new InstanceCreateActionModel();
+            }
+        };
+
+        $this->assertSame('New', $action->create(['name' => 'New'])->name);
+    }
+
+    public function test_update_uses_build_control_payload(): void
+    {
+        DB::shouldReceive('transaction')->once()->andReturnUsing(fn (callable $cb) => $cb());
+
+        $found = StubActionModel::create(['name' => 'Before']);
+        $builder = Mockery::mock(Builder::class);
+        $builder->shouldReceive('findOrFail')->once()->with(3)->andReturn($found);
+        StubActionModel::$queryBuilder = $builder;
+
+        $action = new class extends BaseAction {
+            public function __construct()
+            {
+                $this->model = new StubActionModel();
+            }
+
+            protected function transformPayload(array $data): array
+            {
+                $data['name'] = strtoupper((string) ($data['name'] ?? ''));
+
+                return $data;
+            }
+        };
+
+        $this->assertSame('AFTER', $action->update(3, ['name' => 'after'])->name);
+    }
+
+    public function test_bulk_delete_returns_false_when_nothing_deleted(): void
+    {
+        DB::shouldReceive('transaction')->once()->andReturnUsing(fn (callable $cb) => $cb());
+
+        $builder = Mockery::mock(Builder::class);
+        $builder->shouldReceive('whereIn')->once()->with('id', [99])->andReturnSelf();
+        $builder->shouldReceive('delete')->once()->andReturn(0);
+        StubActionModel::$queryBuilder = $builder;
+
+        $action = new class extends BaseAction {
+            public function __construct()
+            {
+                $this->model = new StubActionModel();
+            }
+        };
+
+        $this->assertFalse($action->bulkDelete([99]));
     }
 
     public function test_sync_relations_covers_all_relation_types_and_missing_relation(): void
     {
         $action = new class extends BaseAction {
-            protected function run(...$args)
-            {
-                return null;
-            }
-
             public function callSync(Model $model, array $relations): void
             {
                 $this->syncRelations($model, $relations);

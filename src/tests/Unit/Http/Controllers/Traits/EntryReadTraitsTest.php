@@ -11,9 +11,9 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator as Paginator;
 use Mockery;
-use Tests\TestCase;
+use Tests\Unit\UnitTestCase;
 
-class EntryReadTraitsTest extends TestCase
+class EntryReadTraitsTest extends UnitTestCase
 {
     protected function tearDown(): void
     {
@@ -25,50 +25,39 @@ class EntryReadTraitsTest extends TestCase
     {
         $controller = new class extends BaseController {
             use EntrySearchTrait;
+
+            public BaseQuery $query;
         };
 
-        $query = new class(Request::create('/')) extends BaseQuery {
-            protected function newQuery(): Builder
-            {
-                return Mockery::mock(Builder::class);
-            }
+        $controller->query = Mockery::mock(BaseQuery::class);
+        $controller->query->shouldReceive('paginate')->once()->andReturn(
+            new Paginator([['id' => 1]], 1, 15, 1)
+        );
 
-            public function paginate(): LengthAwarePaginator
-            {
-                return new Paginator([['id' => 1]], 1, 15, 1);
-            }
-        };
-
-        $response = $controller->search($query);
+        $response = $controller->search();
         $data = json_decode($response->getContent(), true);
 
-        $this->assertSame(200, $response->status());
+        $this->assertSame(200, $response->getStatusCode());
         $this->assertTrue($data['success']);
-        $this->assertSame('Retrieved successfully', $data['message']);
+        $this->assertSame([['id' => 1]], $data['data']);
+        $this->assertSame(1, $data['meta']['pagination']['total']);
     }
 
     public function test_search_error(): void
     {
         $controller = new class extends BaseController {
             use EntrySearchTrait;
+
+            public BaseQuery $query;
         };
 
-        $query = new class(Request::create('/')) extends BaseQuery {
-            protected function newQuery(): Builder
-            {
-                return Mockery::mock(Builder::class);
-            }
+        $controller->query = Mockery::mock(BaseQuery::class);
+        $controller->query->shouldReceive('paginate')->once()->andThrow(new \RuntimeException('search failed'));
 
-            public function paginate(): LengthAwarePaginator
-            {
-                throw new \RuntimeException('search failed');
-            }
-        };
-
-        $response = $controller->search($query);
+        $response = $controller->search();
         $data = json_decode($response->getContent(), true);
 
-        $this->assertSame(500, $response->status());
+        $this->assertSame(500, $response->getStatusCode());
         $this->assertFalse($data['success']);
         $this->assertSame('search failed', $data['message']);
     }
@@ -77,77 +66,51 @@ class EntryReadTraitsTest extends TestCase
     {
         $controller = new class extends BaseController {
             use EntryDetailTrait;
+
+            public BaseQuery $query;
         };
 
-        $query = new class(Request::create('/')) extends BaseQuery {
-            protected function newQuery(): Builder
-            {
-                return Mockery::mock(Builder::class);
-            }
+        $controller->query = Mockery::mock(BaseQuery::class);
+        $controller->query->shouldReceive('findById')->once()->with(8)->andReturn(['id' => 8, 'name' => 'robot']);
 
-            public function findById($id)
-            {
-                return ['id' => $id, 'name' => 'robot'];
-            }
-        };
-
-        $response = $controller->getDetail($query, 8);
+        $response = $controller->getDetail(8);
         $data = json_decode($response->getContent(), true);
 
-        $this->assertSame(200, $response->status());
-        $this->assertTrue($data['success']);
+        $this->assertSame(200, $response->getStatusCode());
         $this->assertSame(8, $data['data']['id']);
-    }
-
-    public function test_get_detail_not_found(): void
-    {
-        $controller = new class extends BaseController {
-            use EntryDetailTrait;
-        };
-
-        $query = new class(Request::create('/')) extends BaseQuery {
-            protected function newQuery(): Builder
-            {
-                return Mockery::mock(Builder::class);
-            }
-
-            public function findById($id)
-            {
-                return null;
-            }
-        };
-
-        $response = $controller->getDetail($query, 8);
-        $data = json_decode($response->getContent(), true);
-
-        $this->assertSame(404, $response->status());
-        $this->assertFalse($data['success']);
-        $this->assertSame('Resource not found', $data['message']);
     }
 
     public function test_get_detail_error(): void
     {
         $controller = new class extends BaseController {
             use EntryDetailTrait;
+
+            public BaseQuery $query;
         };
 
-        $query = new class(Request::create('/')) extends BaseQuery {
-            protected function newQuery(): Builder
-            {
-                return Mockery::mock(Builder::class);
-            }
+        $controller->query = Mockery::mock(BaseQuery::class);
+        $controller->query->shouldReceive('findById')->once()->andThrow(new \RuntimeException('detail failed'));
 
-            public function findById($id)
-            {
-                throw new \RuntimeException('detail failed');
-            }
+        $response = $controller->getDetail(1);
+        $this->assertSame(500, $response->getStatusCode());
+    }
+
+    public function test_get_detail_not_found(): void
+    {
+        $controller = new class extends BaseController {
+            use EntryDetailTrait;
+
+            public BaseQuery $query;
         };
 
-        $response = $controller->getDetail($query, 8);
+        $controller->query = Mockery::mock(BaseQuery::class);
+        $controller->query->shouldReceive('findById')->once()->with(8)->andReturn(null);
+
+        $response = $controller->getDetail(8);
         $data = json_decode($response->getContent(), true);
 
-        $this->assertSame(500, $response->status());
+        $this->assertSame(404, $response->getStatusCode());
         $this->assertFalse($data['success']);
-        $this->assertSame('detail failed', $data['message']);
+        $this->assertSame('Resource not found', $data['message']);
     }
 }

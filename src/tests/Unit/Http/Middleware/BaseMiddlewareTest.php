@@ -7,7 +7,7 @@ use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Mockery;
-use Tests\TestCase;
+use Tests\Unit\UnitTestCase;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 class TestableMiddleware extends BaseMiddleware
@@ -43,7 +43,7 @@ class TestableMiddleware extends BaseMiddleware
     }
 }
 
-class BaseMiddlewareTest extends TestCase
+class BaseMiddlewareTest extends UnitTestCase
 {
     protected TestableMiddleware $middleware;
 

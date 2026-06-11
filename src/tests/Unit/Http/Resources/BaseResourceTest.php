@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Http\Resources;
 
-use Tests\TestCase;
+use Tests\Unit\UnitTestCase;
 use App\Http\Resources\BaseResource;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Model;
@@ -75,7 +75,7 @@ class ExtendedResource extends TestResource
     }
 }
 
-class BaseResourceTest extends TestCase
+class BaseResourceTest extends UnitTestCase
 {
     /**
      * Test BaseResource can transform model.

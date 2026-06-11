@@ -11,9 +11,9 @@ use Illuminate\Validation\ValidationException;
 use App\Models\User;
 use ReflectionMethod;
 use Symfony\Component\HttpKernel\Exception\HttpException;
-use Tests\TestCase;
+use Tests\Unit\UnitTestCase;
 
-class HandlerTest extends TestCase
+class HandlerTest extends UnitTestCase
 {
     protected Handler $handler;
     protected Request $request;

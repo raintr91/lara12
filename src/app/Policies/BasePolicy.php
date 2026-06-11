@@ -2,46 +2,54 @@
 
 namespace App\Policies;
 
-use App\Models\User;
 use Illuminate\Auth\Access\Response;
+use Illuminate\Contracts\Auth\Authenticatable;
 
 abstract class BasePolicy
 {
     /**
-     * Global bypass (super admin)
+     * Global bypass hook — return true/false to short-circuit, or null to continue.
      */
-    public function before(User $user, $ability)
+    public function before(Authenticatable $user, string $ability): ?Response
     {
-        if ($user->role === 'super_admin') {
+        $bypass = $this->bypassAuthorization($user, $ability);
+
+        if ($bypass === true) {
             return $this->allow();
+        }
+
+        if ($bypass === false) {
+            return $this->deny();
         }
 
         return null;
     }
 
-    protected function sameTenant(User $user, $model): bool
+    /**
+     * Override in module policies when a role should bypass all checks.
+     */
+    protected function bypassAuthorization(Authenticatable $user, string $ability): ?bool
     {
-        return !isset($model->tenant_id)
-            || $user->tenant_id === $model->tenant_id;
+        return null;
     }
 
-    protected function isOwner(User $user, $model): bool
+    protected function isOwner(Authenticatable $user, object $model): bool
     {
-        return isset($model->user_id)
-            && $user->id === $model->user_id;
+        return property_exists($model, 'user_id')
+            && ($user->getAuthIdentifier() ?? null) === $model->user_id;
     }
 
-    protected function hasRole(User $user, string $role): bool
+    protected function hasRole(Authenticatable $user, string $role): bool
     {
-        return $user->role === $role;
+        return property_exists($user, 'role') && $user->role === $role;
     }
 
-    protected function allow(string $message = 'Allowed')
+    protected function allow(string $message = 'Allowed'): Response
     {
         return Response::allow($message);
     }
 
-    protected function deny(string $message = 'This action is unauthorized.')
+    protected function deny(string $message = 'This action is unauthorized.'): Response
     {
         return Response::deny($message);
     }

@@ -2,13 +2,13 @@
 
 namespace Tests\Unit\Http\Actions\Concerns;
 
-use Tests\TestCase;
+use Tests\Unit\UnitTestCase;
 use App\Http\Actions\Concerns\CreateOrUpdate;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Mockery;
 
-class CreateOrUpdateTest extends TestCase
+class CreateOrUpdateTest extends UnitTestCase
 {
     protected object $action;
 
@@ -90,6 +90,30 @@ class CreateOrUpdateTest extends TestCase
     /**
      * Test create method instantiates model.
      */
+    public function test_new_query_uses_model_class(): void
+    {
+        $builder = Mockery::mock();
+        CreateOrUpdateFakeModel::$fakeBuilder = $builder;
+
+        $action = new class {
+            use CreateOrUpdate;
+
+            public Model $model;
+
+            public function __construct()
+            {
+                $this->model = new CreateOrUpdateFakeModel();
+            }
+
+            public function callNewQuery()
+            {
+                return $this->newQuery();
+            }
+        };
+
+        $this->assertSame($builder, $action->callNewQuery());
+    }
+
     public function test_create_or_update_by(): void
     {
         $model = Mockery::mock(Model::class);
@@ -215,5 +239,19 @@ class CreateOrUpdateTest extends TestCase
         $this->action->query = $query;
 
         $this->action->publicDeleteById(10);
+    }
+}
+
+class CreateOrUpdateFakeModel extends Model
+{
+    protected $guarded = [];
+
+    public $timestamps = false;
+
+    public static ?object $fakeBuilder = null;
+
+    public static function query()
+    {
+        return static::$fakeBuilder;
     }
 }

@@ -2,10 +2,10 @@
 
 namespace Tests\Unit\Jobs;
 
-use Tests\TestCase;
+use Tests\Unit\UnitTestCase;
 use App\Jobs\BaseJob;
 
-class BaseJobTest extends TestCase
+class BaseJobTest extends UnitTestCase
 {
     /**
      * Test job can be instantiated.
