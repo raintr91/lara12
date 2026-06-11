@@ -4,5 +4,5 @@ namespace $NAMESPACE$;
 
 class $CLASS$ extends $BASE_CLASS$
 {
-    //
+    // Add middleware logic here.
 }

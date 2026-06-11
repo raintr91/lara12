@@ -1,0 +1,16 @@
+<?php
+
+namespace $NAMESPACE$;
+
+class $CLASS$ extends $BASE_CLASS$
+{
+    public function __construct()
+    {
+        parent::__construct();
+    }
+
+    public function handle(): void
+    {
+        //
+    }
+}

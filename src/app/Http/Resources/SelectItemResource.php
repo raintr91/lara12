@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Http\Requests\SelectItemRequest;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -10,11 +11,12 @@ class SelectItemResource extends JsonResource
     public function toArray(Request $request): array
     {
         $keyField = (string) $request->input('key');
-        $nameFields = $request->input('name', []);
-        $info = $request->input('info', []);
-
-        $nameFields = is_array($nameFields) ? array_values(array_filter($nameFields, fn ($v) => is_string($v) && $v !== '')) : [];
-        $info = is_array($info) ? array_values(array_filter($info, fn ($v) => is_string($v) && $v !== '')) : [];
+        $nameFields = $request instanceof SelectItemRequest
+            ? $request->nameFields()
+            : SelectItemRequest::normalizeFieldList($request->input('name'));
+        $info = $request instanceof SelectItemRequest
+            ? $request->infoFields()
+            : SelectItemRequest::normalizeFieldList($request->input('info'));
 
         $keyValue = data_get($this->resource, $keyField);
 

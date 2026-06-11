@@ -1,0 +1,17 @@
+<?php
+
+namespace $NAMESPACE$;
+
+class $CLASS$ extends $BASE_CLASS$
+{
+    protected $signature = '$SIGNATURE$';
+
+    protected $description = '$DESCRIPTION$';
+
+    public function handle(): int
+    {
+        //
+
+        return self::SUCCESS;
+    }
+}

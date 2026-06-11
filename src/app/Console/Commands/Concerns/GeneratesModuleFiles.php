@@ -53,6 +53,11 @@ trait GeneratesModuleFiles
         return $files->isDirectory($this->moduleRoot($module));
     }
 
+    protected function moduleModelClass(string $module, string $name): string
+    {
+        return $this->moduleNamespace($module, 'Models').'\\'.Str::studly($name);
+    }
+
     protected function renderStub(Filesystem $files, string $stubPath, array $replacements): string
     {
         $contents = $files->get($stubPath);

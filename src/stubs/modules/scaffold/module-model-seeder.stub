@@ -9,6 +9,6 @@ class $CLASS$ extends Seeder
     public function run(): void
     {
         // Example:
-        // \$MODEL_FQCN$::factory()->count(10)->create();
+        // $MODEL_FQCN$::factory()->count(10)->create();
     }
 }

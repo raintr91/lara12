@@ -48,6 +48,7 @@ class RemoveModuleCommand extends Command
         }
 
         $this->removePhpUnitTestsuite($files, $name);
+        $this->purgeOrphanTmpPhpunitTestsuites($files);
 
         return 0;
     }
@@ -90,6 +91,27 @@ class RemoveModuleCommand extends Command
         }
         if ($changed) {
             $this->info("Removed coverage excludes for Modules/{$module}/Resources/(Lang|Views)");
+        }
+    }
+
+    /** Remove ghost ModuleTmp* suites left by generator unit tests. */
+    private function purgeOrphanTmpPhpunitTestsuites(Filesystem $files): void
+    {
+        $phpunitPath = base_path('phpunit.xml');
+        if (! $files->exists($phpunitPath)) {
+            return;
+        }
+
+        $contents = $files->get($phpunitPath);
+        $updated = preg_replace(
+            '/\s*<testsuite name="ModuleTmp[^"]+">\s*<directory suffix="Test\.php">[^<]+<\/directory>\s*<\/testsuite>/m',
+            '',
+            $contents,
+        );
+
+        if ($updated !== null && $updated !== $contents) {
+            $files->put($phpunitPath, $updated);
+            $this->info('Purged orphan ModuleTmp* entries from phpunit.xml');
         }
     }
 }

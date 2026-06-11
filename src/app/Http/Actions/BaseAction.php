@@ -7,20 +7,48 @@ use Illuminate\Support\Facades\DB;
 
 abstract class BaseAction
 {
-    /**
-     * Public entry point
-     * Controller chỉ gọi execute()
-     */
-    final public function execute(...$args)
-    {
-        return $this->run(...$args);
-    }
+    public Model $model;
 
     /**
-     * Business logic
-     * Action con tự định nghĩa param + PHPDoc
+     * @return array<string, mixed>
      */
-    abstract protected function run(...$args);
+    protected function buildControlPayload(array $data): array
+    {
+        return $data;
+    }
+
+    public function create(array $data): mixed
+    {
+        return $this->model->create($data);
+    }
+
+    public function update(int $id, array $attributes): mixed
+    {
+
+        return $this->transaction(function () use ($id, $attributes) {
+                $model = $this->model::query()->findOrFail($id);
+                $model->update($this->buildControlPayload($attributes));
+
+                return $model->refresh();
+            });
+    }
+
+    public function delete(int|string $id): mixed
+    {
+        return $this->transaction(function () use ($id) {
+            $model = $this->model::query()->findOrFail((int) $id);
+            $model->delete();
+
+            return null;
+        });
+    }
+
+    public function bulkDelete(array $ids): bool
+    {
+        return $this->transaction(function () use ($ids) {
+            return $this->model::query()->whereIn('id', $ids)->delete() > 0;
+        });
+    }
 
     /* -----------------------------------------------------------------
      | Transaction
@@ -36,22 +64,26 @@ abstract class BaseAction
      |-----------------------------------------------------------------*/
 
     /**
-     * @param class-string<Model> $modelClass
+     * Create a new model instance with given attributes and relations.
+      *
+      * @param array<string, mixed> $attributes
+      * @param array<string, mixed> $relations
+      * @return Model
+      * @throws \Throwable
      */
-    protected function create(
-        string $modelClass,
+    protected function createModel(
         array $attributes,
         array $relations = []
     ): Model {
         /** @var Model $model */
-        $model = $modelClass::create($attributes);
+        $model = $this->model::create($attributes);
 
         $this->syncRelations($model, $relations);
 
         return $model->refresh();
     }
 
-    protected function update(
+    protected function updateModel(
         Model $model,
         array $attributes,
         array $relations = []
@@ -63,7 +95,7 @@ abstract class BaseAction
         return $model->refresh();
     }
 
-    protected function delete(Model $model): void
+    protected function deleteModel(Model $model): void
     {
         $model->delete();
     }

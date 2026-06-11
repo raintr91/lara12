@@ -16,21 +16,19 @@ trait SelectItemQueryTrait
      *
      * Returns Eloquent models with only needed columns (and optionally loaded relations).
      */
-    public function getListSelectItems(): Collection
+    public function getListSelectItems(?SelectItemRequest $request = null): Collection
     {
-        $request = $this->request;
+        $request ??= $this->request instanceof SelectItemRequest ? $this->request : null;
 
         if (!$request instanceof SelectItemRequest) {
             throw new \RuntimeException(static::class . ': request must extend ' . SelectItemRequest::class);
         }
 
-        $model = $request->modelInstance();
-
         $keyField = $request->keyField();
         $nameFields = $request->nameFields();
         $info = $request->infoFields();
 
-        [$scalarInfoFields, $relations, $relationFields] = $this->parseInfo($model, $info);
+        [$scalarInfoFields, $relations, $relationFields] = $this->parseInfo($info);
 
         $columns = array_values(array_filter(array_unique(array_merge(
             [$keyField],
@@ -42,7 +40,7 @@ trait SelectItemQueryTrait
 
         // Ensure required columns for relations exist on parent.
         foreach (array_unique(array_merge($relations, array_keys($relationFields))) as $relation) {
-            $relationInstance = $this->relationInstance($model, $relation);
+            $relationInstance = $this->relationInstance($relation);
             if ($relationInstance instanceof BelongsTo) {
                 $columns[] = $relationInstance->getForeignKeyName();
             }
@@ -54,7 +52,7 @@ trait SelectItemQueryTrait
 
         $with = [];
         foreach (array_unique(array_merge($relations, array_keys($relationFields))) as $relation) {
-            $relationInstance = $this->relationInstance($model, $relation);
+            $relationInstance = $this->relationInstance($relation);
             if (!$relationInstance) {
                 continue;
             }
@@ -85,11 +83,11 @@ trait SelectItemQueryTrait
     /**
      * @return array{0: string[], 1: string[], 2: array<string, string[]>}
      */
-    private function parseInfo(Model $model, array $info): array
+    private function parseInfo( array $info): array
     {
         $allowedScalar = array_values(array_filter(array_unique(array_merge(
-            [$model->getKeyName()],
-            $model->getFillable()
+            [$this->model->getKeyName()],
+            $this->model->getFillable()
         ))));
 
         $allowed = [];
@@ -103,7 +101,7 @@ trait SelectItemQueryTrait
 
             if (str_contains($item, '.')) {
                 [$relation, $field] = explode('.', $item, 2);
-                if ($relation !== '' && $field !== '' && $this->relationInstance($model, $relation)) {
+                if ($relation !== '' && $field !== '' && $this->relationInstance($relation)) {
                     $relationFields[$relation] ??= [];
                     $relationFields[$relation][] = $field;
                 }
@@ -111,7 +109,7 @@ trait SelectItemQueryTrait
                 continue;
             }
 
-            if ($this->isRelationName($model, $item)) {
+            if ($this->isRelationName($item)) {
                 $relations[] = $item;
                 continue;
             }
@@ -129,19 +127,19 @@ trait SelectItemQueryTrait
         ];
     }
 
-    private function isRelationName(Model $model, string $name): bool
+    private function isRelationName(string $name): bool
     {
-        return (bool) $this->relationInstance($model, $name);
+        return (bool) $this->relationInstance($name);
     }
 
-    private function relationInstance(Model $model, string $name): ?Relation
+    private function relationInstance(string $name): ?Relation
     {
-        if (!method_exists($model, $name)) {
+        if (!method_exists($this->model, $name)) {
             return null;
         }
 
         try {
-            $relation = $model->{$name}();
+            $relation = $this->model->{$name}();
             return ($relation instanceof Relation) ? $relation : null;
         } catch (\Throwable $e) {
             return null;

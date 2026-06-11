@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
 
 /*
 |--------------------------------------------------------------------------
@@ -11,8 +12,12 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::prefix(strtolower('$STUDLY_NAME$'))
+Route::prefix(Str::kebab('$STUDLY_NAME$'))
     ->as(strtolower('$STUDLY_NAME$').'.')
     ->group(function () {
-        // Route::get('/', [\$MODULE_NAMESPACE$\$STUDLY_NAME$\Http\Controllers\Controller::class, 'index']);
+        // Route::get('search', [\$MODULE_NAMESPACE$\$STUDLY_NAME$\Http\Controllers\Controller::class, 'search']);
+        // Route::get('detail/{id}', [\$MODULE_NAMESPACE$\$STUDLY_NAME$\Http\Controllers\Controller::class, 'getDetail']);
+        // Route::post('/', [\$MODULE_NAMESPACE$\$STUDLY_NAME$\Http\Controllers\Controller::class, 'create']);
+        // Route::put('edit/{id}', [\$MODULE_NAMESPACE$\$STUDLY_NAME$\Http\Controllers\Controller::class, 'update']);
+        // Route::delete('delete/{id}', [\$MODULE_NAMESPACE$\$STUDLY_NAME$\Http\Controllers\Controller::class, 'delete']);
     });

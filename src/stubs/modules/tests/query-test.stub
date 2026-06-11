@@ -63,9 +63,8 @@ class $TEST_CLASS$ extends TestCase
             return;
         }
 
-        $this->expectException(\BadMethodCallException::class);
-        $this->expectExceptionMessage('$TARGET_FQCN$::newQuery() is not implemented yet.');
+        $query = new \$TARGET_FQCN$(Request::create('/admin-test', 'GET'));
 
-        new \$TARGET_FQCN$(Request::create('/admin-test', 'GET'));
+        $this->assertInstanceOf(\$TARGET_FQCN$::class, $query);
     }
 }

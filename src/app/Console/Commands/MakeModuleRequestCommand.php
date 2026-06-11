@@ -42,10 +42,12 @@ class MakeModuleRequestCommand extends BaseCommand
         }
 
         $targetPath = $this->moduleRoot($module)."/Http/Requests/{$name}.php";
+        $extendsBulkDelete = Str::endsWith($name, 'BulkDeleteRequest');
         $contents = $this->renderStub($files, base_path('stubs/modules/scaffold/module-request-child.stub'), [
             'NAMESPACE' => $this->moduleNamespace($module, 'Http\\Requests'),
             'CLASS' => $name,
-            'BASE_CLASS' => $baseClass,
+            'BASE_CLASS' => $extendsBulkDelete ? 'BulkDeleteRequest' : $baseClass,
+            'BASE_IMPORT' => $extendsBulkDelete ? "use App\\Http\\Requests\\BulkDeleteRequest;" : '',
         ]);
 
         try {

@@ -6,5 +6,5 @@ use App\Http\Middleware\BaseMiddleware;
 
 abstract class $STUDLY_NAME$Middleware extends BaseMiddleware
 {
-    //
+    // Override in child middleware classes.
 }

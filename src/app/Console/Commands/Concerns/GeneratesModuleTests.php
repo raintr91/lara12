@@ -72,6 +72,10 @@ trait GeneratesModuleTests
             return;
         }
 
+        if (! $this->shouldRegisterModuleTestsuiteInPhpunit($module)) {
+            return;
+        }
+
         $contents = $files->get($phpunitPath);
         $suiteName = 'Module'.$module;
         if (str_contains($contents, 'testsuite name="'.$suiteName.'"')) {
@@ -131,6 +135,18 @@ trait GeneratesModuleTests
                 'stub_path' => base_path('stubs/modules/tests/resource-test.stub'),
                 'base_suffix' => 'Resource',
             ],
+            'command' => [
+                'prod_suffix' => 'Console\\Commands',
+                'test_suffix' => 'Tests\\Unit\\Console\\Commands',
+                'stub_path' => base_path('stubs/modules/tests/command-test.stub'),
+                'base_suffix' => 'Command',
+            ],
+            'job' => [
+                'prod_suffix' => 'Jobs',
+                'test_suffix' => 'Tests\\Unit\\Jobs',
+                'stub_path' => base_path('stubs/modules/tests/job-test.stub'),
+                'base_suffix' => 'Job',
+            ],
         ];
 
         if (! isset($types[$type])) {
@@ -156,5 +172,24 @@ trait GeneratesModuleTests
             'test_class' => $testClass,
             'test_path' => $testPath,
         ];
+    }
+
+    /**
+     * Only real modules (modules_statuses.json) get a PHPUnit testsuite — never Tmp* scratch modules.
+     */
+    protected function shouldRegisterModuleTestsuiteInPhpunit(string $module): bool
+    {
+        if (preg_match('/^Tmp/i', $module) === 1) {
+            return false;
+        }
+
+        $path = base_path('modules_statuses.json');
+        if (! is_file($path)) {
+            return true;
+        }
+
+        $statuses = json_decode((string) file_get_contents($path), true);
+
+        return is_array($statuses) && ($statuses[$module] ?? false) === true;
     }
 }

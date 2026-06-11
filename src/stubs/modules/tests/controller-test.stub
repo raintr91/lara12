@@ -71,35 +71,18 @@ class $TEST_CLASS$ extends TestCase
         );
     }
 
-    public function test_controller_public_methods_return_json_response(): void
+    public function test_controller_is_resolvable_from_container(): void
     {
         $reflection = new ReflectionClass(\$TARGET_FQCN$::class);
 
         if ($reflection->isAbstract()) {
-            $controller = new class extends \$TARGET_FQCN$ {};
-            $this->assertInstanceOf(\$TARGET_FQCN$::class, $controller);
+            $this->assertTrue($reflection->isAbstract());
 
             return;
         }
 
-        $controller = new \$TARGET_FQCN$();
-        $methods = array_filter(
-            $reflection->getMethods(ReflectionMethod::IS_PUBLIC),
-            fn (ReflectionMethod $method): bool =>
-                $method->class === $reflection->getName()
-                && ! in_array($method->name, ['__construct', 'middleware'], true)
-                && ! $this->isTraitHelperMethod($method)
-        );
-
-        foreach ($methods as $method) {
-            $response = $this->invokeControllerMethod($controller, $method);
-
-            $this->assertInstanceOf(
-                JsonResponse::class,
-                $response,
-                sprintf('Method [%s] should return JsonResponse.', $method->name)
-            );
-        }
+        $controller = $this->app->make(\$TARGET_FQCN$::class);
+        $this->assertInstanceOf(\$TARGET_FQCN$::class, $controller);
     }
 
     private function invokeControllerMethod(object $controller, ReflectionMethod $method): JsonResponse

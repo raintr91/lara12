@@ -1,10 +1,11 @@
 <?php
 
-namespace Tests\Unit\Models;
+namespace $TEST_NAMESPACE$;
 
-use App\Models\$MODEL_CLASS$;
+use Tests\Unit\Models\ModelTestCase;
+use $MODEL_FQCN$;
 
-class $CLASS$ extends BaseModelTest
+class $CLASS$ extends ModelTestCase
 {
     protected string $modelClass = $MODEL_CLASS$::class;
 }

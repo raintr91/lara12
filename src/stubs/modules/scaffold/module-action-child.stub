@@ -2,10 +2,12 @@
 
 namespace $NAMESPACE$;
 
+use $MODEL_CLASS$;
+
 class $CLASS$ extends $BASE_CLASS$
 {
-    protected function run(...$args): mixed
+    public function __construct($MODEL_VAR$)
     {
-        throw new \BadMethodCallException(static::class.'::run() is not implemented yet.');
+$MODEL_ASSIGN$
     }
 }

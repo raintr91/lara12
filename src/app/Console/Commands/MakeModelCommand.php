@@ -4,15 +4,18 @@ namespace App\Console\Commands;
 
 use App\Console\Commands\Concerns\AsksToOverwriteExisting;
 use App\Console\Commands\Concerns\GeneratesModuleFiles;
+use App\Console\Commands\Concerns\ResolvesAppModelPath;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Str;
 
 class MakeModelCommand extends BaseCommand
 {
-    use GeneratesModuleFiles;
     use AsksToOverwriteExisting;
+    use GeneratesModuleFiles;
+    use ResolvesAppModelPath;
 
-    protected $signature = 'm:model {name}
+    protected $signature = 'm:model {name : Model class name (StudlyCase, no slashes)}
+                            {path? : Subpath under App/Models (e.g. Control or Control/Sub)}
                             {--force : Overwrite if file exists}
                             {--yes : Force yes to all prompts}
                             {--create-model= : yes|no}
@@ -22,84 +25,107 @@ class MakeModelCommand extends BaseCommand
                             {--create-another-migration= : yes|no when migration exists}
                             {--skip-questions : Do not ask questions for unspecified options; use defaults}';
 
-    protected $description = 'Interactively create an app model extending BaseModel, and optionally migration/factory/seeder.';
+    protected $description = 'Create an app model: m:model Chain Platform → App\\Models\\Platform\\Chain';
 
-    public function handle()
+    public function handle(): int
     {
         /** @var Filesystem $files */
         $files = $this->laravel['files'];
 
-        $rawName = Str::studly((string) $this->argument('name'));
-        $modelClass = Str::endsWith($rawName, 'Model') ? Str::beforeLast($rawName, 'Model') : $rawName;
+        try {
+            $target = $this->resolveAppModelTarget(
+                (string) $this->argument('name'),
+                $this->argument('path') !== null ? (string) $this->argument('path') : null
+            );
+        } catch (\InvalidArgumentException $e) {
+            $this->error($e->getMessage());
 
-        $modelPath = app_path("Models/{$modelClass}.php");
-        $modelTestClass = $modelClass.'ModelTest';
-        $modelTestPath = base_path("tests/Unit/Models/{$modelTestClass}.php");
+            return 1;
+        }
+
+        $modelClass = $target['modelClass'];
+        $modelPath = $target['modelPath'];
+        $modelTestPath = $target['testPath'];
+        $modelTestClass = $target['testClass'];
+
         $forceWrite = (bool) $this->option('force') || $this->shouldForceYes();
-        $modelAction = $this->askCreateOrOverwrite($files, 'create-model', "Create {$modelClass} model?", $modelPath, true);
 
-        $createMigration = $this->askYesNo('create-migration', "Create migration for {$modelClass}?", true);
-        $factoryClass = $modelClass.'Factory';
-        $seederClass = $modelClass.'Seeder';
+        $pathLabel = $target['pathSegments'] === []
+            ? 'App\\Models'
+            : $target['modelNamespace'];
 
-        $factoryPath = database_path("factories/{$factoryClass}.php");
-        $factoryAction = $this->askCreateOrOverwrite($files, 'create-factory', "Create {$factoryClass}?", $factoryPath, true);
+        $this->line("Target: <info>{$target['modelFqcn']}</info> ({$pathLabel})");
 
-        $seederPath = database_path("seeders/{$seederClass}.php");
-        $seederAction = $this->askCreateOrOverwrite($files, 'create-seeder', "Create {$seederClass}?", $seederPath, false);
+        $modelAction = $this->askCreateOrOverwrite(
+            $files,
+            'create-model',
+            "Create {$modelClass} model at {$modelPath}?",
+            $modelPath,
+            true
+        );
+
+        $createMigration = $this->askYesNo('create-migration', "Create migration for table [{$target['table']}]?", true);
+
+        $factoryPath = $target['factoryPath'];
+        $factoryAction = $this->askCreateOrOverwrite(
+            $files,
+            'create-factory',
+            "Create {$target['factoryClass']} at {$factoryPath}?",
+            $factoryPath,
+            true
+        );
+
+        $seederPath = $target['seederPath'];
+        $seederAction = $this->askCreateOrOverwrite(
+            $files,
+            'create-seeder',
+            "Create {$target['seederClass']} at {$seederPath}?",
+            $seederPath,
+            false
+        );
 
         if ($modelAction === 'create' || $modelAction === 'overwrite') {
             $contents = $this->renderStub($files, base_path('stubs/app/model.stub'), [
+                'NAMESPACE' => $target['modelNamespace'],
                 'CLASS' => $modelClass,
+                'BASE_CLASS' => $target['baseClass'],
+                'BASE_USE' => $target['baseUse'],
             ]);
 
             try {
-                $this->putFile($files, $modelPath, $contents, $modelAction === 'overwrite' || (bool) $this->option('force'));
+                $this->putFile($files, $modelPath, $contents, $modelAction === 'overwrite' || $forceWrite);
             } catch (\RuntimeException $e) {
                 $this->error($e->getMessage());
+
                 return 1;
             }
 
             $this->info("Created: {$modelPath}");
         }
 
-        // Enforce one independent test class per app model under tests/Unit/Models.
         if ($modelAction !== 'no' || $files->exists($modelPath)) {
-            $this->ensureModelTestFile($files, $modelClass, $modelTestClass, $modelTestPath, $forceWrite);
+            $this->ensureModelTestFile($files, $target, $forceWrite);
         }
 
         if ($createMigration) {
-            $table = Str::snake(Str::pluralStudly($modelClass));
-            $migrationName = "create_{$table}_table";
-            $existing = glob(database_path("migrations/*_{$migrationName}.php")) ?: [];
-
-            $createAnother = true;
-            if ($existing !== []) {
-                $createAnother = $this->askYesNo('create-another-migration', "Migration for '{$table}' already exists. Create another one?", false);
-            }
-
-            if ($existing === [] || $createAnother) {
-                $args = [
-                    'name' => $migrationName,
-                    '--create' => $table,
-                ];
-                if ($this->shouldForceYes()) {
-                    $args['--yes'] = true;
-                }
-                $this->call('make:migration', $args);
-            }
+            $this->createMigrationForTarget($target);
         }
 
         if ($factoryAction === 'create' || $factoryAction === 'overwrite') {
             $contents = $this->renderStub($files, base_path('stubs/app/factory.stub'), [
-                'CLASS' => $factoryClass,
+                'FACTORY_NAMESPACE' => $target['factoryNamespace'],
+                'CLASS' => $target['factoryClass'],
+                'MODEL_FQCN' => $target['modelFqcn'],
                 'MODEL_CLASS' => $modelClass,
+                'FACTORY_BASE_CLASS' => $target['factoryBaseClass'],
+                'FACTORY_BASE_USE' => $target['factoryBaseUse'],
             ]);
 
             try {
-                $this->putFile($files, $factoryPath, $contents, $factoryAction === 'overwrite' || (bool) $this->option('force'));
+                $this->putFile($files, $factoryPath, $contents, $factoryAction === 'overwrite' || $forceWrite);
             } catch (\RuntimeException $e) {
                 $this->error($e->getMessage());
+
                 return 1;
             }
 
@@ -108,14 +134,17 @@ class MakeModelCommand extends BaseCommand
 
         if ($seederAction === 'create' || $seederAction === 'overwrite') {
             $contents = $this->renderStub($files, base_path('stubs/app/seeder.stub'), [
-                'CLASS' => $seederClass,
+                'SEEDER_NAMESPACE' => $target['seederNamespace'],
+                'CLASS' => $target['seederClass'],
+                'MODEL_FQCN' => $target['modelFqcn'],
                 'MODEL_CLASS' => $modelClass,
             ]);
 
             try {
-                $this->putFile($files, $seederPath, $contents, $seederAction === 'overwrite' || (bool) $this->option('force'));
+                $this->putFile($files, $seederPath, $contents, $seederAction === 'overwrite' || $forceWrite);
             } catch (\RuntimeException $e) {
                 $this->error($e->getMessage());
+
                 return 1;
             }
 
@@ -125,36 +154,86 @@ class MakeModelCommand extends BaseCommand
         return 0;
     }
 
-    private function ensureModelTestFile(
-        Filesystem $files,
-        string $modelClass,
-        string $modelTestClass,
-        string $modelTestPath,
-        bool $forceWrite
-    ): void {
-        $stubPath = base_path('stubs/app/model-test.stub');
-        if (! $files->exists($stubPath)) {
-            $this->warn("Stub not found: {$stubPath}");
+    /**
+     * @param  array{
+     *     modelClass: string,
+     *     table: string,
+     *     migrationPath: string
+     * }  $target
+     */
+    private function createMigrationForTarget(array $target): void
+    {
+        $migrationName = 'create_'.$target['table'].'_table';
+        $migrationDir = $target['migrationPath'] === 'database/migrations'
+            ? database_path('migrations')
+            : database_path('migrations/'.Str::after($target['migrationPath'], 'database/migrations/'));
+
+        $existing = glob($migrationDir.'/*_'.$migrationName.'.php') ?: [];
+
+        $createAnother = true;
+        if ($existing !== []) {
+            $createAnother = $this->askYesNo(
+                'create-another-migration',
+                "Migration for '{$target['table']}' already exists. Create another one?",
+                false
+            );
+        }
+
+        if ($existing !== [] && ! $createAnother) {
             return;
         }
 
-        if ($files->exists($modelTestPath) && ! $forceWrite) {
-            $this->info("Keeping existing model test: {$modelTestPath}");
+        $args = [
+            'name' => $migrationName,
+            '--create' => $target['table'],
+        ];
+
+        if ($target['migrationPath'] !== 'database/migrations') {
+            $args['--path'] = $target['migrationPath'];
+        }
+
+        $this->call('make:migration', $args);
+    }
+
+    /**
+     * @param  array{
+     *     modelClass: string,
+     *     modelFqcn: string,
+     *     testNamespace: string,
+     *     testPath: string,
+     *     testClass: string
+     * }  $target
+     */
+    private function ensureModelTestFile(Filesystem $files, array $target, bool $forceWrite): void
+    {
+        $stubPath = base_path('stubs/app/model-test.stub');
+        if (! $files->exists($stubPath)) {
+            $this->warn("Stub not found: {$stubPath}");
+
+            return;
+        }
+
+        if ($files->exists($target['testPath']) && ! $forceWrite) {
+            $this->info("Keeping existing model test: {$target['testPath']}");
+
             return;
         }
 
         $contents = $this->renderStub($files, $stubPath, [
-            'CLASS' => $modelTestClass,
-            'MODEL_CLASS' => $modelClass,
+            'TEST_NAMESPACE' => $target['testNamespace'],
+            'CLASS' => $target['testClass'],
+            'MODEL_FQCN' => $target['modelFqcn'],
+            'MODEL_CLASS' => $target['modelClass'],
         ]);
 
         try {
-            $this->putFile($files, $modelTestPath, $contents, $forceWrite);
+            $this->putFile($files, $target['testPath'], $contents, $forceWrite);
         } catch (\RuntimeException $e) {
             $this->error($e->getMessage());
+
             return;
         }
 
-        $this->info("Created: {$modelTestPath}");
+        $this->info("Created: {$target['testPath']}");
     }
 }

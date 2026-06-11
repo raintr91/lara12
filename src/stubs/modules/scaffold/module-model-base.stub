@@ -6,5 +6,5 @@ use App\Models\BaseModel;
 
 abstract class $CLASS$ extends BaseModel
 {
-    //
+    // Shared module model behavior lives here.
 }

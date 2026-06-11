@@ -7,10 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Resources\Json\JsonResource;
+use App\Http\Queries\Criteria\BaseCriteria;
 use App\Http\Queries\Criteria\Criteria;
-use App\Http\Queries\Criteria\FilterCriteria;
-use App\Http\Queries\Criteria\IncludeCriteria;
-use App\Http\Queries\Criteria\SortCriteria;
 
 abstract class BaseQuery
 {
@@ -23,6 +21,12 @@ abstract class BaseQuery
     /** @var string|null */
     protected ?string $resource = null;
 
+    /**
+     * Optional query-level Criteria class to auto-apply.
+     * Concrete queries can override {@see criteriaClass()} for clarity.
+     */
+    protected ?string $criteriaClass = null;
+
     public function __construct(Request $request)
     {
         $this->request = $request;
@@ -31,9 +35,11 @@ abstract class BaseQuery
     }
 
     /**
-     * BẮT BUỘC: return Model::query()
+     * BẮT BUỘC: return Model::query() or null
      */
-    abstract protected function newQuery(): Builder;
+    abstract protected function newQuery(): ?Builder;
+
+    public ?Model $model = null;
 
     /**
      * Override nếu cần add criteria mặc định
@@ -41,19 +47,30 @@ abstract class BaseQuery
     protected function boot(): void
     {
         $filters = $this->filters();
-        if (!empty($filters)) {
-            $this->pushCriteria(new FilterCriteria($filters));
-        }
-
         $sorts = $this->sorts();
-        if (!empty($sorts)) {
-            $this->pushCriteria(new SortCriteria($sorts));
+        $includes = $this->includes();
+
+        if ($filters !== [] || $sorts !== [] || $includes !== []) {
+            $this->pushCriteria(new BaseCriteria($filters, $sorts, $includes));
         }
 
-        $includes = $this->includes();
-        if (!empty($includes)) {
-            $this->pushCriteria(new IncludeCriteria($includes));
+        $criteriaClass = $this->criteriaClass();
+        if (! $criteriaClass) {
+            return;
         }
+
+        if (is_subclass_of($criteriaClass, Criteria::class)) {
+            $this->pushCriteria(new $criteriaClass());
+        }
+    }
+
+    /**
+     * Return Criteria class FQCN (or null) to auto-apply for this query.
+     * Prefer overriding this method (explicit) over convention-based resolution.
+     */
+    protected function criteriaClass(): ?string
+    {
+        return $this->criteriaClass;
     }
 
     /**
@@ -198,8 +215,17 @@ abstract class BaseQuery
         return $this->applyCriteria()->exists();
     }
 
-    public function paginate(): LengthAwarePaginator
+    /**
+     * Paginated list, or all rows when the request sets all=1 (SearchRequest).
+     *
+     * @return LengthAwarePaginator|\Illuminate\Support\Collection<int, mixed>
+     */
+    public function paginate(): LengthAwarePaginator|\Illuminate\Support\Collection
     {
+        if (! $this->shouldPaginate()) {
+            return $this->applyCriteria()->get();
+        }
+
         $paginator = $this->applyCriteria()->paginate(
             $this->perPage(),
             ['*'],
@@ -207,7 +233,7 @@ abstract class BaseQuery
             $this->page()
         );
 
-        if (!$this->resource) {
+        if (! $this->resource) {
             return $paginator;
         }
 
@@ -281,11 +307,31 @@ abstract class BaseQuery
      | -------------------------------------------------
      */
 
+    protected function shouldPaginate(): bool
+    {
+        $request = $this->request;
+
+        if (method_exists($request, 'shouldPaginate')) {
+            return $request->shouldPaginate();
+        }
+
+        if (filter_var($request->input('all', false), FILTER_VALIDATE_BOOLEAN)) {
+            return false;
+        }
+
+        return true;
+    }
+
     protected function perPage(): int
     {
+        $max = 100;
+        if (method_exists($this->request, 'getMaxPerPage')) {
+            $max = (int) $this->request->getMaxPerPage();
+        }
+
         return min(
             max((int) $this->request->get('per_page', 15), 1),
-            100
+            max($max, 1)
         );
     }
 

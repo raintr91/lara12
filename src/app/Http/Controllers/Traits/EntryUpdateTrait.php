@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Traits;
 
 use App\Http\Actions\BaseAction;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Request;
 
 trait EntryUpdateTrait
@@ -10,19 +11,24 @@ trait EntryUpdateTrait
     /**
      * Update an existing resource.
      *
-     * @param BaseAction $action
      * @param Request $request
      * @param int|string $id
-     * @param string $operation
      * @return \Illuminate\Http\JsonResponse
      */
-    public function update(BaseAction $action, Request $request, $id, string $operation = 'update')
+    public function update(
+        Request $request,
+        $id,
+        string $message = 'Updated successfully'
+    )
     {
         try {
-            $data = array_merge($request->validated(), ['id' => $id, 'operation' => $operation]);
-            $result = $action->execute($data);
+            $data = $request instanceof FormRequest
+                ? $request->validated()
+                : $request->all();
 
-            return $this->success($result, 'Updated successfully');
+            $result = $this->action->update($id, $data);
+
+            return $this->success($result, $message);
         } catch (\Exception $e) {
             return $this->error($e->getMessage(), 500);
         }

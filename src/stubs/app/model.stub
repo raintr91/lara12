@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Models;
+namespace $NAMESPACE$;
 
-class $CLASS$ extends BaseModel
+$BASE_USE$
+class $CLASS$ extends $BASE_CLASS$
 {
     //
 }

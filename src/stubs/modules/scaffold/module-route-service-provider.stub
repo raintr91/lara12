@@ -1,0 +1,38 @@
+<?php
+
+namespace $MODULE_NAMESPACE$\$STUDLY_NAME$\Providers;
+
+use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
+use Illuminate\Support\Facades\Route;
+
+class RouteServiceProvider extends ServiceProvider
+{
+    protected string $name = '$STUDLY_NAME$';
+
+    public function boot(): void
+    {
+        parent::boot();
+    }
+
+    public function map(): void
+    {
+        $this->mapApiRoutes();
+
+        if (is_file(module_path($this->name, '/Routes/web.php'))) {
+            $this->mapWebRoutes();
+        }
+    }
+
+    protected function mapWebRoutes(): void
+    {
+        Route::middleware('web')->group(module_path($this->name, '/Routes/web.php'));
+    }
+
+    protected function mapApiRoutes(): void
+    {
+        Route::middleware('api')
+            ->prefix('api/$MODULE_NAME_KEBAB$')
+            ->name('api.$MODULE_NAME_LOWER$.')
+            ->group(module_path($this->name, '/Routes/api.php'));
+    }
+}

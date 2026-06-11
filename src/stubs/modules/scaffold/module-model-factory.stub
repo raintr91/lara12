@@ -11,12 +11,12 @@ class $CLASS$ extends BaseModelFactory
      *
      * @var class-string<\Illuminate\Database\Eloquent\Model>
      */
-    protected $model = \$MODEL_FQCN$::class;
+    protected $model = $MODEL_FQCN$::class;
 
     public function definition(): array
     {
         return [
-            //
+            // Add fake model attributes here.
         ];
     }
 }

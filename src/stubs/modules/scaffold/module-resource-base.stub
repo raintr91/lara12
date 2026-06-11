@@ -9,6 +9,7 @@ abstract class $STUDLY_NAME$Resource extends BaseResource
 {
     protected function fields(Request $request): array
     {
+        // Override in child resource classes.
         return [];
     }
 }

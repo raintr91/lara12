@@ -12,7 +12,9 @@ class AddActionCommand extends BaseCommand
     use GeneratesModuleFiles;
     use AsksToOverwriteExisting;
 
-    protected $signature = 'add:action {module : Module name (StudlyCase)} {controller : Controller name (StudlyCase, no Controller suffix)} {action : create|update|delete|search|detail}
+    protected $aliases = ['m:add-action'];
+
+    protected $signature = 'add:action {module : Module name (StudlyCase)} {controller : Controller name (StudlyCase, no Controller suffix)} {action : create|update|delete|bulk-delete|search|detail}
                             {--yes : Force yes/overwrite for all prompt steps}
                             {--skip-questions : Do not ask questions for unspecified options; use defaults}';
 
@@ -43,7 +45,7 @@ class AddActionCommand extends BaseCommand
 
         $action = $this->normalizeAction((string) $this->argument('action'));
         if (! $action) {
-            $this->error('Invalid action. Supported: create, update, delete, search, detail');
+            $this->error('Invalid action. Supported: create, update, delete, bulk-delete, search, detail');
             return 1;
         }
 
@@ -51,13 +53,15 @@ class AddActionCommand extends BaseCommand
         $queryClass = $this->studlyWithSuffix($name, 'Query');
         $createRequestClass = $this->studlyWithSuffix($name . 'Create', 'Request');
         $searchRequestClass = $this->studlyWithSuffix($name . 'Search', 'Request');
+        $bulkDeleteRequestClass = $this->studlyWithSuffix($name . 'BulkDelete', 'Request');
 
         $actionPath = $moduleRoot . "/Http/Actions/{$actionClass}.php";
         $queryPath = $moduleRoot . "/Http/Queries/{$queryClass}.php";
         $createRequestPath = $moduleRoot . "/Http/Requests/{$createRequestClass}.php";
         $searchRequestPath = $moduleRoot . "/Http/Requests/{$searchRequestClass}.php";
+        $bulkDeleteRequestPath = $moduleRoot . "/Http/Requests/{$bulkDeleteRequestClass}.php";
 
-        if (in_array($action, ['create', 'update', 'delete'], true)) {
+        if (in_array($action, ['create', 'update', 'delete', 'bulk-delete'], true)) {
             if (! $this->ensureActionExists($files, $module, $actionClass, $actionPath)) {
                 return 1;
             }
@@ -81,6 +85,12 @@ class AddActionCommand extends BaseCommand
             }
         }
 
+        if ($action === 'bulk-delete') {
+            if (! $this->ensureBulkDeleteRequestExists($files, $module, $bulkDeleteRequestClass, $bulkDeleteRequestPath)) {
+                return 1;
+            }
+        }
+
         $this->patchController(
             $files,
             $controllerPath,
@@ -89,7 +99,8 @@ class AddActionCommand extends BaseCommand
             $actionClass,
             $queryClass,
             $createRequestClass,
-            $searchRequestClass
+            $searchRequestClass,
+            $bulkDeleteRequestClass
         );
 
         $this->patchRoutes(
@@ -114,6 +125,7 @@ class AddActionCommand extends BaseCommand
             'create' => 'create',
             'update' => 'update',
             'delete' => 'delete',
+            'bulk-delete', 'bulkdelete', 'multiple-delete', 'multipledelete' => 'bulk-delete',
             'search', 'list' => 'search',
             'detail', 'getdetail', 'get-detail' => 'detail',
             default => null,
@@ -184,6 +196,27 @@ class AddActionCommand extends BaseCommand
         return true;
     }
 
+    private function ensureBulkDeleteRequestExists(Filesystem $files, string $module, string $class, string $path): bool
+    {
+        if ($files->exists($path)) {
+            return true;
+        }
+
+        $shouldCreate = $this->askYesNo('yes', "Bulk delete request not found. Create {$class} for module {$module}?", true);
+
+        if (! $shouldCreate) {
+            $this->warn('This endpoint requires a BulkDelete request class. Aborting.');
+            return false;
+        }
+
+        $this->call('m:request', [
+            'module' => $module,
+            'name' => $class,
+        ]);
+
+        return true;
+    }
+
     private function patchController(
         Filesystem $files,
         string $path,
@@ -192,20 +225,21 @@ class AddActionCommand extends BaseCommand
         string $actionClass,
         string $queryClass,
         string $createRequestClass,
-        string $searchRequestClass
+        string $searchRequestClass,
+        string $bulkDeleteRequestClass = ''
     ): void {
         $contents = $files->get($path);
 
-        $traitImport = match ($action) {
+        $extraImports = [];
+        $traitImportMap = [
             'create' => 'App\\Http\\Controllers\\Traits\\EntryCreateTrait',
             'update' => 'App\\Http\\Controllers\\Traits\\EntryUpdateTrait',
             'delete' => 'App\\Http\\Controllers\\Traits\\EntryDeleteTrait',
+            'bulk-delete' => 'App\\Http\\Controllers\\Traits\\EntryBulkDeleteTrait',
             'search' => 'App\\Http\\Controllers\\Traits\\EntrySearchTrait',
             'detail' => 'App\\Http\\Controllers\\Traits\\EntryDetailTrait',
-        };
-
-        $extraImports = [$traitImport];
-        if (in_array($action, ['create', 'update', 'delete'], true)) {
+        ];
+        if (in_array($action, ['create', 'update', 'delete', 'bulk-delete'], true)) {
             $extraImports[] = "Modules\\{$module}\\Http\\Actions\\{$actionClass}";
         }
         if (in_array($action, ['search', 'detail'], true)) {
@@ -216,6 +250,12 @@ class AddActionCommand extends BaseCommand
         }
         if ($action === 'search') {
             $extraImports[] = "Modules\\{$module}\\Http\\Requests\\{$searchRequestClass}";
+        }
+        if ($action === 'bulk-delete' && $bulkDeleteRequestClass !== '') {
+            $extraImports[] = "Modules\\{$module}\\Http\\Requests\\{$bulkDeleteRequestClass}";
+        }
+        if (isset($traitImportMap[$action])) {
+            $extraImports[] = $traitImportMap[$action];
         }
 
         foreach (array_values(array_unique($extraImports)) as $import) {
@@ -229,34 +269,37 @@ class AddActionCommand extends BaseCommand
             }
         }
 
-        [$traitName, $traitAlias, $traitMethod] = match ($action) {
-            'create' => ['EntryCreateTrait', 'traitCreate', 'create'],
-            'update' => ['EntryUpdateTrait', 'traitUpdate', 'update'],
-            'delete' => ['EntryDeleteTrait', 'traitDelete', 'delete'],
-            'search' => ['EntrySearchTrait', 'traitSearch', 'search'],
-            'detail' => ['EntryDetailTrait', 'traitGetDetail', 'getDetail'],
-        };
+        $needsActionDependency = in_array($action, ['create', 'update', 'delete', 'bulk-delete'], true);
+        $needsQueryDependency = in_array($action, ['search', 'detail'], true);
 
-        if (! preg_match('/\buse\s+' . preg_quote($traitName, '/') . '\b/', $contents)) {
-            $traitBlock = "    use {$traitName} {\n        {$traitMethod} as protected {$traitAlias};\n    }\n\n";
+        if (($needsActionDependency || $needsQueryDependency) && ! preg_match('/function\s+__construct\s*\(/', $contents)) {
+            $dependencyBlock = $this->buildControllerDependencyBlock($actionClass, $queryClass, $needsActionDependency, $needsQueryDependency);
             $contents = preg_replace(
                 '/class\s+\w+\s+extends\s+\w+\s*\{\n/m',
-                "$0{$traitBlock}",
+                "$0{$dependencyBlock}",
                 $contents,
                 1
             ) ?? $contents;
         }
 
-        $methodName = $action === 'detail' ? 'getDetail' : $action;
-        if (! preg_match('/function\s+' . preg_quote($methodName, '/') . '\s*\(/', $contents)) {
-            $method = $this->controllerMethodTemplate(
-                $action,
-                $actionClass,
-                $queryClass,
-                $createRequestClass,
-                $searchRequestClass
-            );
-            $contents = preg_replace('/\n}\s*$/', "\n{$method}\n}\n", $contents, 1) ?? $contents;
+        // Always add the corresponding trait for the action, never generate the CRUD method
+        $traitMap = [
+            'create' => 'EntryCreateTrait',
+            'update' => 'EntryUpdateTrait',
+            'delete' => 'EntryDeleteTrait',
+            'bulk-delete' => 'EntryBulkDeleteTrait',
+            'search' => 'EntrySearchTrait',
+            'detail' => 'EntryDetailTrait',
+        ];
+        $trait = $traitMap[$action] ?? null;
+        if ($trait && !preg_match('/use\\s+' . preg_quote($trait, '/') . '\s*;/', $contents)) {
+            // Insert use trait after class opening or after constructor
+            if (preg_match('/(class\s+\w+\s+extends\s+\w+\s*\{\n)/', $contents, $m, PREG_OFFSET_CAPTURE)) {
+                $pos = $m[1][1] + strlen($m[1][0]);
+                $contents = substr($contents, 0, $pos)
+                    . "    use {$trait};\n"
+                    . substr($contents, $pos);
+            }
         }
 
         $files->put($path, $contents);
@@ -271,28 +314,47 @@ class AddActionCommand extends BaseCommand
         string $searchRequestClass
     ): string {
         return match ($action) {
-            'create' => '    public function create(' . $actionClass . ' $action, ' . $createRequestClass . " \$request, string \$operation = 'create')\n"
+            'create' => "    public function create({$createRequestClass} \$request)\n"
                 . "    {\n"
-                . "        return \$this->traitCreate(\$action, \$request, \$operation);\n"
+                . "        return \$this->success(\$this->action->create(\$request->validated()), 'Created successfully', 201);\n"
                 . "    }\n",
-            'update' => '    public function update(' . $actionClass . ' $action, ' . $createRequestClass . " \$request, \$id, string \$operation = 'update')\n"
+            'update' => "    public function update({$createRequestClass} \$request, \$id)\n"
                 . "    {\n"
-                . "        return \$this->traitUpdate(\$action, \$request, \$id, \$operation);\n"
+                . "        return \$this->success(\$this->action->update((int) \$id, \$request->validated()), 'Updated successfully');\n"
                 . "    }\n",
-            'delete' => '    public function delete(' . $actionClass . " \$action, \$id, string \$operation = 'delete')\n"
+            'delete' => "    public function delete(\$id)\n"
                 . "    {\n"
-                . "        return \$this->traitDelete(\$action, \$id, \$operation);\n"
+                . "        return \$this->success(\$this->action->delete((int) \$id), 'Deleted successfully');\n"
                 . "    }\n",
-            'search' => '    public function search(' . $searchRequestClass . " \$request)\n"
+            'search' => "    public function search({$searchRequestClass} \$request)\n"
                 . "    {\n"
-                . '        $query = app()->makeWith(' . $queryClass . "::class, ['request' => \$request]);\n"
-                . "        return \$this->traitSearch(\$query);\n"
+                . "        return \$this->success(\$this->query->paginate(), 'Retrieved successfully');\n"
                 . "    }\n",
-            'detail' => '    public function getDetail(' . $queryClass . " \$query, \$id)\n"
+            'detail' => "    public function getDetail(\$id)\n"
                 . "    {\n"
-                . "        return \$this->traitGetDetail(\$query, \$id);\n"
+                . "        return \$this->success(\$this->query->findById(\$id), 'Retrieved successfully');\n"
                 . "    }\n",
         };
+    }
+
+    private function buildControllerDependencyBlock(string $actionClass, string $queryClass, bool $needsActionDependency, bool $needsQueryDependency): string
+    {
+        $constructorParams = [];
+
+        if ($needsActionDependency) {
+            $constructorParams[] = 'private readonly ' . $actionClass . ' $action';
+        }
+
+        if ($needsQueryDependency) {
+            $constructorParams[] = 'private readonly ' . $queryClass . ' $query';
+        }
+
+        $block = '';
+        $block .= '    public function __construct('.implode(', ', $constructorParams).")\n";
+        $block .= "    {\n";
+        $block .= "    }\n\n";
+
+        return $block;
     }
 
     private function patchRoutes(
@@ -319,7 +381,12 @@ class AddActionCommand extends BaseCommand
             ) ?? $contents;
         }
 
-        $methodName = $action === 'detail' ? 'getDetail' : $action;
+        $methodName = match ($action) {
+            'detail' => 'getDetail',
+            'bulk-delete' => 'bulkDelete',
+            default => $action,
+        };
+
         if (str_contains($contents, "[{$controllerClass}::class, '{$methodName}']")) {
             if ($contents !== $files->get($apiRoutesPath)) {
                 $files->put($apiRoutesPath, $contents);
@@ -330,13 +397,14 @@ class AddActionCommand extends BaseCommand
 
         $routeLine = match ($action) {
             'create' => "            Route::post('/', [{$controllerClass}::class, 'create']);\n",
-            'update' => "            Route::put('{id}', [{$controllerClass}::class, 'update']);\n",
-            'delete' => "            Route::delete('{id}', [{$controllerClass}::class, 'delete']);\n",
-            'search' => "            Route::post('search', [{$controllerClass}::class, 'search']);\n",
-            'detail' => "            Route::get('{id}', [{$controllerClass}::class, 'getDetail']);\n",
+            'update' => "            Route::put('edit/{id}', [{$controllerClass}::class, 'update']);\n",
+            'delete' => "            Route::delete('delete/{id}', [{$controllerClass}::class, 'delete']);\n",
+            'bulk-delete' => "       Route::post('bulk-delete', [{$controllerClass}::class, 'bulkDelete']);\n",
+            'search' => "            Route::get('search', [{$controllerClass}::class, 'search']);\n",
+            'detail' => "            Route::get('detail/{id}', [{$controllerClass}::class, 'getDetail']);\n",
         };
 
-        $prefix = Str::plural(Str::snake($name));
+        $prefix = Str::kebab($name);
         $needle = "prefix('{$prefix}')";
 
         if (str_contains($contents, $needle)) {
@@ -357,7 +425,7 @@ class AddActionCommand extends BaseCommand
             return;
         }
 
-        $block = "\n        Route::middleware('auth:sanctum')->prefix('{$prefix}')->group(function () {\n{$routeLine}        });\n";
+        $block = "\n        Route::prefix('{$prefix}')->group(function () {\n{$routeLine}        });\n";
         $contents2 = preg_replace(
             "/(require\s+__DIR__\s*\.\s*['\"]\\/auth\\.php['\"];\s*\n)/",
             "$1{$block}",

@@ -6,6 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 trait CreateOrUpdate
 {
+    public function newQuery()
+    {
+        return $this->model::query();
+    }
+
     /**
      * Create or update by conditions
      */

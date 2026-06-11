@@ -1,9 +1,9 @@
 <?php
 
-namespace Database\Seeders;
+namespace $SEEDER_NAMESPACE$;
 
 use Illuminate\Database\Seeder;
-use App\Models\$MODEL_CLASS$;
+use $MODEL_FQCN$;
 
 class $CLASS$ extends Seeder
 {

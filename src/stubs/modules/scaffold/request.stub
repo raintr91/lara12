@@ -4,7 +4,7 @@ namespace $MODULE_NAMESPACE$\$STUDLY_NAME$\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class Request extends FormRequest
+class $CLASS$ extends FormRequest
 {
     public function authorize(): bool
     {

@@ -2,7 +2,8 @@
 
 namespace $NAMESPACE$;
 
+$BASE_IMPORT$
 class $CLASS$ extends $BASE_CLASS$
 {
-    //
+    // Add request rules or helpers here.
 }

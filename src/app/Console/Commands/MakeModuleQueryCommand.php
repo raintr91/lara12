@@ -16,6 +16,7 @@ class MakeModuleQueryCommand extends BaseCommand
                             {--force : Overwrite if file exists}
                             {--with-criteria : Also create corresponding Criteria class (e.g. UsersQuery -> UsersCriteria)}
                             {--create-criteria= : yes|no}
+                            {--model-fqn= : Fully qualified model class name (e.g. App\\Models\\Platform\\Chain)}
                             {--yes : Force yes for prompt steps}
                             {--skip-questions : Do not ask questions for unspecified options; use defaults}';
 
@@ -46,10 +47,20 @@ class MakeModuleQueryCommand extends BaseCommand
         }
 
         $targetPath = $this->moduleRoot($module)."/Http/Queries/{$name}.php";
+        $modelFqn = trim((string) $this->option('model-fqn'));
+        $modelUse = '';
+        $modelQuery = 'null';
+        if ($modelFqn !== '') {
+            $modelShort = Str::afterLast($modelFqn, '\\');
+            $modelUse = 'use ' . $modelFqn . ';';
+            $modelQuery = $modelShort . '::query()';
+        }
         $contents = $this->renderStub($files, base_path('stubs/modules/scaffold/module-query-child.stub'), [
             'NAMESPACE' => $this->moduleNamespace($module, 'Http\\Queries'),
             'CLASS' => $name,
             'BASE_CLASS' => $baseClass,
+            'MODEL_USE' => $modelUse,
+            'MODEL_QUERY' => $modelQuery,
         ]);
 
         try {

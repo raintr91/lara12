@@ -1,0 +1,59 @@
+<?php
+
+namespace $TEST_NAMESPACE$;
+
+use App\Console\Commands\BaseCommand;
+use Illuminate\Console\Command;
+use ReflectionClass;
+use $TARGET_FQCN$;
+use Tests\TestCase;
+
+class $TEST_CLASS$ extends TestCase
+{
+    public function test_target_file_exists(): void
+    {
+        $this->assertFileExists(base_path('$TARGET_RELATIVE_PATH$'));
+    }
+
+    public function test_target_class_declaration_matches_expected_fqcn(): void
+    {
+        $path = base_path('$TARGET_RELATIVE_PATH$');
+        $contents = file_get_contents($path);
+
+        $this->assertNotFalse($contents, "Unable to read [{$path}].");
+
+        preg_match('/^namespace\s+([^;]+);/m', $contents, $namespaceMatches);
+        preg_match('/^\s*(?:abstract\s+|final\s+)?(?:class|interface|trait|enum)\s+([A-Za-z_][A-Za-z0-9_]*)/m', $contents, $classMatches);
+
+        $this->assertArrayHasKey(1, $namespaceMatches, "No namespace declaration found in [{$path}].");
+        $this->assertArrayHasKey(1, $classMatches, "No class-like declaration found in [{$path}].");
+
+        $declaredFqcn = trim($namespaceMatches[1]).'\\'.trim($classMatches[1]);
+        $this->assertSame('$TARGET_FQCN$', $declaredFqcn);
+    }
+
+    public function test_command_class_is_loadable(): void
+    {
+        $this->assertTrue(class_exists(\$TARGET_FQCN$::class));
+    }
+
+    public function test_command_extends_module_base_command(): void
+    {
+        $this->assertTrue(is_subclass_of(\$TARGET_FQCN$::class, \$TARGET_BASE_FQCN$::class));
+    }
+
+    public function test_command_extends_app_base_command(): void
+    {
+        $this->assertTrue(is_subclass_of(\$TARGET_FQCN$::class, BaseCommand::class));
+        $this->assertTrue(is_subclass_of(\$TARGET_FQCN$::class, Command::class));
+    }
+
+    public function test_command_has_signature(): void
+    {
+        $reflection = new ReflectionClass(\$TARGET_FQCN$::class);
+        $defaults = $reflection->getDefaultProperties();
+
+        $this->assertArrayHasKey('signature', $defaults);
+        $this->assertNotSame('', trim((string) $defaults['signature']));
+    }
+}

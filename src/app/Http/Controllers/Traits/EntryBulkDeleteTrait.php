@@ -2,32 +2,21 @@
 
 namespace App\Http\Controllers\Traits;
 
-use App\Http\Actions\BaseAction;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Request;
+use App\Http\Requests\BulkDeleteRequest;
 
 trait EntryBulkDeleteTrait
 {
     /**
      * Bulk delete resources.
-     *
-     * @param BaseAction $action
-     * @param FormRequest|Request $request
-     * @param string $operation
-     * @return \Illuminate\Http\JsonResponse
      */
-    public function bulkDelete(BaseAction $action, $request, string $operation = 'bulk_delete')
-    {
+    public function bulkDelete(
+        BulkDeleteRequest $request,
+        string $message = 'Deleted successfully'
+    ) {
         try {
-            $payload = $request instanceof FormRequest
-                ? $request->validated()
-                : $request->all();
+            $result = $this->action->bulkDelete($request->ids());
 
-            $payload['operation'] = $operation;
-
-            $result = $action->execute($payload);
-
-            return $this->success($result, 'Deleted successfully');
+            return $this->success($result, $message);
         } catch (\Exception $e) {
             return $this->error($e->getMessage(), 500);
         }

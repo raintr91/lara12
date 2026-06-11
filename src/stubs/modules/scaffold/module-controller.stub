@@ -7,6 +7,12 @@ $EXTRA_IMPORTS$
 
 class $CONTROLLER$ extends $BASE_CONTROLLER$
 {
-$CLASS_TRAITS$
-    // ...
+$PROPERTIES$
+
+    public function __construct($CONSTRUCTOR_SIGNATURE$)
+    {
+$CONSTRUCTOR_BODY$
+    }
+
+$TRAITS$
 }

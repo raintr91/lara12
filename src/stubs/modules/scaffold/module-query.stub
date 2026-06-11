@@ -7,5 +7,5 @@ use Illuminate\Database\Eloquent\Builder;
 
 abstract class $STUDLY_NAME$Query extends BaseQuery
 {
-    // Implement `newQuery(): Builder` in concrete queries.
+    // Override `newQuery(): Builder` in child query classes.
 }

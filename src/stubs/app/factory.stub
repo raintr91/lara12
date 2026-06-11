@@ -1,11 +1,10 @@
 <?php
 
-namespace Database\Factories;
+namespace $FACTORY_NAMESPACE$;
 
-use Database\Factories\BaseModelFactory;
-use App\Models\$MODEL_CLASS$;
-
-class $CLASS$ extends BaseModelFactory
+use $MODEL_FQCN$;
+$FACTORY_BASE_USE$
+class $CLASS$ extends $FACTORY_BASE_CLASS$
 {
     /**
      * @var class-string<\Illuminate\Database\Eloquent\Model>

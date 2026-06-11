@@ -2,12 +2,13 @@
 
 namespace $NAMESPACE$;
 
+$MODEL_USE$
 use Illuminate\Database\Eloquent\Builder;
 
 class $CLASS$ extends $BASE_CLASS$
 {
-    protected function newQuery(): Builder
+    protected function newQuery(): ?Builder
     {
-        throw new \BadMethodCallException(static::class.'::newQuery() is not implemented yet.');
+        return $MODEL_QUERY$;
     }
 }

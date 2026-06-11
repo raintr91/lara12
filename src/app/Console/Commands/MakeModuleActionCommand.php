@@ -13,7 +13,8 @@ class MakeModuleActionCommand extends BaseCommand
     use GeneratesModuleTests;
 
     protected $signature = 'm:action {module} {name}
-                            {--force : Overwrite if file exists}';
+                            {--force : Overwrite if file exists}
+                            {--model-fqn= : Fully qualified model class name (e.g. App\\Models\\Platform\\Chain)}';
 
     protected $description = 'Create an action in a module that extends the module base action (e.g. CreateUserAction extends AdminAction).';
 
@@ -41,11 +42,28 @@ class MakeModuleActionCommand extends BaseCommand
             $this->line("Created base: {$baseClass}");
         }
 
+
         $targetPath = $this->moduleRoot($module)."/Http/Actions/{$name}.php";
+
+        $modelFqn = trim((string) $this->option('model-fqn'));
+        if ($modelFqn) {
+            $modelClass = $modelFqn;
+            $shortModelClass = Str::afterLast($modelClass, '\\');
+            $constructorSignature = $shortModelClass . ' $model';
+            $modelAssign = '        $this->model = $model;';
+        } else {
+            $modelClass = $this->moduleModelClass($module, $name);
+            $constructorSignature = '';
+            $modelAssign = '        $this->model = null;';
+        }
+
         $contents = $this->renderStub($files, base_path('stubs/modules/scaffold/module-action-child.stub'), [
             'NAMESPACE' => $this->moduleNamespace($module, 'Http\\Actions'),
             'CLASS' => $name,
             'BASE_CLASS' => $baseClass,
+            'MODEL_CLASS' => $modelClass,
+            'MODEL_VAR' => $constructorSignature,
+            'MODEL_ASSIGN' => $modelAssign,
         ]);
 
         try {

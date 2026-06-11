@@ -8,6 +8,7 @@ abstract class $STUDLY_NAME$Request extends BaseRequest
 {
     public function rules(): array
     {
+        // Override in child request classes.
         return [];
     }
 }

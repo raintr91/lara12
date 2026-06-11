@@ -15,7 +15,8 @@ class AddSelectItemApiCommand extends BaseCommand
     protected $signature = 'add:select-item {module : Module name (StudlyCase)} {controller : Controller name (StudlyCase, no Controller suffix)}
                             {--force : Overwrite generated request/resource if they exist}
                             {--yes : Force yes/overwrite for all prompt steps}
-                            {--skip-questions : Do not ask questions for unspecified options; use defaults}';
+                            {--skip-questions : Do not ask questions for unspecified options; use defaults}
+                            {--model-fqn= : Fully qualified model class name (e.g. App\\Models\\Platform\\Chain)}';
 
     protected $description = 'Add select-items API scaffolding (request/resource + controller/query wiring) to an existing module controller.';
 
@@ -66,7 +67,7 @@ class AddSelectItemApiCommand extends BaseCommand
         $selectResourceClass = $this->studlyWithSuffix($name . 'SelectItem', 'Resource');
         $selectResourcePath = $moduleRoot . "/Http/Resources/{$selectResourceClass}.php";
 
-        $modelFqn = $this->guessModelFqn($files, $name);
+        $modelFqn = $this->option('model-fqn') ?: $this->guessModelFqn($files, $name);
 
         $force = (bool) $this->option('force');
 
@@ -74,7 +75,7 @@ class AddSelectItemApiCommand extends BaseCommand
         $this->createSelectItemResource($files, $module, $selectResourceClass, $selectResourcePath, $force);
 
         $this->patchQuery($files, $queryPath);
-        $this->patchController($files, $controllerPath, $module, $queryClass, $selectRequestClass, $selectResourceClass);
+        $this->patchController($files, $controllerPath, $module, $queryClass, $selectResourceClass);
 
         $this->patchRoutes($files, $moduleRoot . '/Routes/api.php', $module, $name, $controllerClass);
 
@@ -190,15 +191,13 @@ class AddSelectItemApiCommand extends BaseCommand
         string $path,
         string $module,
         string $queryClass,
-        string $selectRequestClass,
         string $selectResourceClass
     ): void {
         $contents = $files->get($path);
 
         $imports = [
-            'App\\Http\\Controllers\\Traits\\SelectItemControllerTrait',
+            'App\\Http\\Requests\\SelectItemRequest',
             "Modules\\{$module}\\Http\\Queries\\{$queryClass}",
-            "Modules\\{$module}\\Http\\Requests\\{$selectRequestClass}",
             "Modules\\{$module}\\Http\\Resources\\{$selectResourceClass}",
         ];
 
@@ -213,25 +212,14 @@ class AddSelectItemApiCommand extends BaseCommand
             }
         }
 
-        $hasTraitUse = (bool) preg_match('/\buse\s+SelectItemControllerTrait\b/', $contents);
-        if (! $hasTraitUse) {
-            // Insert trait usage inside class.
-            $contents = preg_replace(
-                '/class\s+\w+\s+extends\s+\w+\s*\{\n/m',
-                "$0    use SelectItemControllerTrait {\n        getListSelect as protected traitGetListSelect;\n    }\n\n",
-                $contents,
-                1
-            ) ?? $contents;
-        }
+        if (!str_contains($contents, 'function getListSelect(')) {
+            $method = "\n    public function getListSelect(SelectItemRequest \$request)\n    {\n        \$items = \$this->query->getListSelectItems(\$request);\n        \$data = {$selectResourceClass}::collection(\$items)->resolve(\$request);\n\n        return \$this->success(\$data, 'Retrieved successfully');\n    }\n";
 
-        if (!str_contains($contents, 'function selectItemQueryClass')) {
-            $methods = "\n    public function getListSelect({$selectRequestClass} \$request)\n    {\n        return \$this->traitGetListSelect(\$request);\n    }\n\n    protected function selectItemQueryClass(): string\n    {\n        return {$queryClass}::class;\n    }\n\n    protected function selectItemResourceClass(): string\n    {\n        return {$selectResourceClass}::class;\n    }\n";
-
-            $contents = preg_replace('/\n}\s*$/', $methods . "\n}\n", $contents, 1) ?? $contents;
+            $contents = preg_replace('/\n}\s*$/', $method . "\n}\n", $contents, 1) ?? $contents;
         }
 
         $files->put($path, $contents);
-        $this->line("Patched: {$path} (SelectItemControllerTrait)");
+        $this->line("Patched: {$path} (select-items)");
     }
 
     private function patchRoutes(
@@ -257,7 +245,7 @@ class AddSelectItemApiCommand extends BaseCommand
             ) ?? $contents;
         }
 
-        $prefix = Str::plural(Str::snake($name));
+        $prefix = Str::kebab($name);
         $needle = "prefix('{$prefix}')";
 
         $alreadyWired = str_contains($contents, "[{$controllerClass}::class, 'getListSelect']");
@@ -270,12 +258,12 @@ class AddSelectItemApiCommand extends BaseCommand
             return;
         }
 
-        $routeLine = "            Route::post('select-items', [{$controllerClass}::class, 'getListSelect']);\n";
+        $routeLine = "            Route::get('select-items', [{$controllerClass}::class, 'getListSelect']);\n";
 
         if (str_contains($contents, $needle)) {
             // Insert right after the existing search route if present, else after group open.
             $contents2 = preg_replace(
-                "/(Route::post\('search', \[{$controllerClass}::class, 'search'\]\);\n)/",
+                "/(Route::(?:get|post)\('search', \[{$controllerClass}::class, 'search'\]\);\n)/",
                 "$1{$routeLine}",
                 $contents,
                 1
@@ -303,7 +291,7 @@ class AddSelectItemApiCommand extends BaseCommand
         }
 
         // Group not found: add a minimal group under the module group.
-        $block = "\n        Route::middleware('auth:sanctum')->prefix('{$prefix}')->group(function () {\n{$routeLine}        });\n";
+        $block = "\n        Route::prefix('{$prefix}')->group(function () {\n{$routeLine}        });\n";
         $contents2 = preg_replace(
             "/(require\s+__DIR__\s*\.\s*['\"]\\/auth\\.php['\"];\s*\n)/",
             "$1{$block}",

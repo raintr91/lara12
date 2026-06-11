@@ -6,5 +6,5 @@ use App\Http\Actions\BaseAction;
 
 abstract class $STUDLY_NAME$Action extends BaseAction
 {
-    //
+    // Override in child action classes.
 }

@@ -11,9 +11,7 @@ class MakeModuleCommand extends Command
     protected $signature = 'm:module {name : Module name (StudlyCase)}
                             {--force : Overwrite if module exists}
                             {--disabled : Create module but keep disabled}
-                            {--plain : Create a plain module}
-                            {--api : Create an API-only module}
-                            {--with-web : Also keep web routes (Routes/web.php)}';
+                            {--plain : Create a plain module}';
 
     protected $description = 'Create a new module and generate prefixed abstract base classes (AdminController, AdminMiddleware, ...) extending app base classes.';
 
@@ -37,16 +35,8 @@ class MakeModuleCommand extends Command
             $args['--plain'] = true;
         }
 
-        $withWeb = (bool) $this->option('with-web');
-        $apiOnly = (bool) $this->option('api');
-
-        // Default to API-only modules (no Routes/web.php) unless --with-web is explicitly provided.
-        if (! $withWeb) {
-            $args['--api'] = true;
-        } elseif ($apiOnly) {
-            // if user explicitly asks --api, respect it even if --with-web was provided
-            $args['--api'] = true;
-        }
+        // Backend-only policy: modules are always API-only.
+        $args['--api'] = true;
 
         $code = $this->call('module:make', $args);
         if ($code !== 0) {
@@ -57,11 +47,12 @@ class MakeModuleCommand extends Command
         $this->removeModuleExampleTests($files, $name);
         $this->generateInitialModuleRouteTests($files, $name);
 
-        // API-only preference: remove Routes/web.php if it exists and make RouteServiceProvider resilient.
-        if (! $withWeb) {
-            $this->removeWebRoutesIfPresent($files, $name);
-            $this->guardWebRoutesMapping($files, $name);
-        }
+        // Enforce project-standard API route provider shape for every generated module.
+        $this->writeStandardModuleRouteServiceProvider($files, $name);
+
+        // API-only policy: remove Routes/web.php if it exists and make RouteServiceProvider resilient.
+        $this->removeWebRoutesIfPresent($files, $name);
+        $this->guardWebRoutesMapping($files, $name);
 
         // Register module provider path in ModuleProvider::boot() and ::register()
             $providerFQN = 'Modules\\'.$name.'\\Providers\\'.$name.'ServiceProvider';
@@ -102,16 +93,26 @@ class MakeModuleCommand extends Command
             ]
         );
 
-        $this->call('module:make-job', [
-            'name' => $name.'Job',
-            'module' => $name,
-        ]);
+        $this->generateFromStub(
+            $files,
+            base_path('stubs/modules/job.stub'),
+            base_path('Modules/'.$name.'/Jobs/'.$name.'Job.php'),
+            [
+                'NAMESPACE' => config('modules.namespace', 'Modules').'\\'.$name.'\\Jobs',
+                'CLASS' => $name.'Job',
+            ]
+        );
 
-        $this->call('module:make-command', [
-            'name' => $name.'Command',
-            'module' => $name,
-            '--command' => $lower.':run',
-        ]);
+        $this->generateFromStub(
+            $files,
+            base_path('stubs/modules/command.stub'),
+            base_path('Modules/'.$name.'/Console/Commands/'.$name.'Command.php'),
+            [
+                'NAMESPACE' => config('modules.namespace', 'Modules').'\\'.$name.'\\Console\\Commands',
+                'CLASS' => $name.'Command',
+                'COMMAND_NAME' => $lower.':run',
+            ]
+        );
 
         // Actions / Queries are custom conventions (no built-in nwidart generators)
         $moduleRoot = base_path('Modules/'.$name);
@@ -173,6 +174,23 @@ class MakeModuleCommand extends Command
             $files->put($providerPath, $updated);
             $this->line("Updated: {$providerPath} (guard web routes mapping)");
         }
+    }
+
+    private function writeStandardModuleRouteServiceProvider(Filesystem $files, string $module): void
+    {
+        $targetPath = base_path('Modules/'.$module.'/Providers/RouteServiceProvider.php');
+
+        $this->generateFromStub(
+            $files,
+            base_path('stubs/modules/scaffold/module-route-service-provider.stub'),
+            $targetPath,
+            [
+                'MODULE_NAMESPACE' => config('modules.namespace', 'Modules'),
+                'STUDLY_NAME' => $module,
+                'MODULE_NAME_LOWER' => Str::lower($module),
+                'MODULE_NAME_KEBAB' => Str::kebab($module),
+            ]
+        );
     }
 
 

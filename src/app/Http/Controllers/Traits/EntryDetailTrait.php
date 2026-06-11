@@ -9,14 +9,13 @@ trait EntryDetailTrait
     /**
      * Get detail of a resource.
      *
-     * @param BaseQuery $query
      * @param int|string $id
      * @return \Illuminate\Http\JsonResponse
      */
-    public function getDetail(BaseQuery $query, $id)
+    public function getDetail($id)
     {
         try {
-            $data = $query->findById($id);
+            $data = $this->query->findById($id);
 
             if (! $data) {
                 return $this->error('Resource not found', 404);

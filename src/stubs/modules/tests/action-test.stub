@@ -39,29 +39,4 @@ class $TEST_CLASS$ extends TestCase
     {
         $this->assertTrue(is_subclass_of(\$TARGET_FQCN$::class, \App\Http\Actions\BaseAction::class));
     }
-
-    public function test_action_execute_path_is_exercised(): void
-    {
-        $reflection = new ReflectionClass(\$TARGET_FQCN$::class);
-
-        if ($reflection->isAbstract()) {
-            $action = new class extends \$TARGET_FQCN$ {
-                protected function run(...$args): mixed
-                {
-                    return $args[0] ?? 'ok';
-                }
-            };
-
-            $this->assertSame('ok', $action->execute('ok'));
-
-            return;
-        }
-
-        $action = new \$TARGET_FQCN$();
-
-        $this->expectException(\BadMethodCallException::class);
-        $this->expectExceptionMessage('$TARGET_FQCN$::run() is not implemented yet.');
-
-        $action->execute(['sample' => true]);
-    }
 }

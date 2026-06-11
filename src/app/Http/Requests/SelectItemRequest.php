@@ -58,23 +58,33 @@ abstract class SelectItemRequest extends BaseRequest
     /** @return string[] */
     public function nameFields(): array
     {
-        $name = $this->input('name', []);
-        if (!is_array($name)) {
-            return [];
-        }
-
-        return array_values(array_filter($name, fn ($v) => is_string($v) && $v !== ''));
+        return self::normalizeFieldList($this->input('name'));
     }
 
     /** @return string[] */
     public function infoFields(): array
     {
-        $info = $this->input('info', []);
-        if (!is_array($info)) {
+        return self::normalizeFieldList($this->input('info'));
+    }
+
+    /**
+     * Normalize select field list input.
+     *
+     * String => single field label; array => combine multiple fields (existing behavior).
+     *
+     * @return string[]
+     */
+    public static function normalizeFieldList(mixed $value): array
+    {
+        if (is_string($value) && $value !== '') {
+            return [$value];
+        }
+
+        if (! is_array($value)) {
             return [];
         }
 
-        return array_values(array_filter($info, fn ($v) => is_string($v) && $v !== ''));
+        return array_values(array_filter($value, fn ($v) => is_string($v) && $v !== ''));
     }
 
     public function rules(): array
@@ -89,17 +99,61 @@ abstract class SelectItemRequest extends BaseRequest
             // Key field for v-model value
             'key' => ['required', 'string', Rule::in($allowed)],
 
-            // Name fields for display label (allow concat multiple fields)
-            'name' => ['required', 'array', 'min:1'],
-            'name.*' => ['required', 'string', Rule::in($allowed)],
+            // Name: one field (string) or combined label (array)
+            'name' => ['required', $this->scalarFieldListRule($allowed, minItems: 1)],
 
             // Optional extra fields/relations; invalid items will be ignored by query layer
-            'info' => ['nullable', 'array'],
-            'info.*' => ['nullable', 'string'],
+            'info' => ['nullable', $this->scalarFieldListRule(allowed: null, minItems: 0)],
 
             // Optional pagination if caller wants (kept compatible with BaseQuery)
             'page' => ['nullable', 'integer', 'min:1'],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
         ];
+    }
+
+    /**
+     * @param  string[]|null  $allowed  When set, each field must be in this list.
+     */
+    protected function scalarFieldListRule(?array $allowed, int $minItems): \Closure
+    {
+        return function (string $attribute, mixed $value, \Closure $fail) use ($allowed, $minItems): void {
+            if (is_string($value)) {
+                if ($value === '') {
+                    $fail(__('validation.min.array', ['attribute' => $attribute, 'min' => max(1, $minItems)]));
+
+                    return;
+                }
+
+                if ($allowed !== null && ! in_array($value, $allowed, true)) {
+                    $fail(__('validation.in', ['attribute' => $attribute]));
+                }
+
+                return;
+            }
+
+            if (! is_array($value)) {
+                $fail(__('validation.array', ['attribute' => $attribute]));
+
+                return;
+            }
+
+            $items = array_values(array_filter($value, fn ($v) => is_string($v) && $v !== ''));
+
+            if (count($items) < $minItems) {
+                $fail(__('validation.min.array', ['attribute' => $attribute, 'min' => max(1, $minItems)]));
+
+                return;
+            }
+
+            if ($allowed === null) {
+                return;
+            }
+
+            foreach ($items as $index => $item) {
+                if (! in_array($item, $allowed, true)) {
+                    $fail(__('validation.in', ['attribute' => "{$attribute}.{$index}"]));
+                }
+            }
+        };
     }
 }
