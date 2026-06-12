@@ -121,6 +121,48 @@ Sometimes CRUD is implemented first, and select-items is added later. Use:
 
 - `php artisan add:select-item Admin Task`
 
+## Add create-or-update API (1-1 relationship settings)
+
+Dùng cho setting 1-1 (vd mail server / hotel). Code sinh ra **rõ ràng**, không qua Service hay trait.
+
+```bash
+php artisan m:add-createOrUpdate Admin Hotel serverMail settingMailServer
+```
+
+Tự sinh theo rule (không cần nhập thêm):
+
+| Input | Sinh ra |
+|-------|---------|
+| `Hotel` + `settingMailServer` | `HotelSettingMailServerRequest` |
+| `settingMailServer` | route `hotels/{id}/setting-mail-server` |
+| parent model `Hotel` | `match-key` = `hotel_id` |
+| `serverMail` relationship | related model từ `HasOne` |
+
+Nếu thiếu model hoặc relationship → báo lỗi + hint.
+
+### Điều kiện bắt buộc
+
+1. Parent model (`App\Models\Platform\Hotel`)
+2. Related model (`HotelServerMail`) có `belongsTo()`
+3. Parent có HasOne — tên **lowerCamelCase**:
+
+```php
+public function serverMail(): HasOne
+{
+    return $this->hasOne(HotelServerMail::class);
+}
+```
+
+### Sinh ra gì
+
+- `HotelSettingMailServerRequest` = `{Controller}{Method}Request`
+- `HotelController::settingMailServer($id, $request)` → `$this->action->settingMailServer(...)`
+- `HotelAction::settingMailServer($id, $data)` — `findOrFail()->serverMail()->updateOrCreate()` với `$data` từ Request, **không** chuẩn hóa/encrypt ở Action
+- `HotelSettingMailServerRequest` — rules theo fillable related model (table `hotel_server_mails`); coder tùy chỉnh required/nullable
+- Route: `PUT hotels/{id}/setting-mail-server` (prefix plural, segment kebab của method)
+
+Option: `--force` ghi đè request đã có.
+
 ## Add one controller action to an existing controller
 
 Use this to add one endpoint at a time without regenerating the controller:

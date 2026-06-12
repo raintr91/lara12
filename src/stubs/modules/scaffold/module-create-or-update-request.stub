@@ -1,0 +1,19 @@
+<?php
+
+namespace $NAMESPACE$;
+
+$BASE_IMPORT$
+
+class $CLASS$ extends $BASE_CLASS$
+{
+    /**
+     * Keys theo fillable của $RELATED_MODEL$ (table $TABLE$), trừ parent id (lấy từ path {id}).
+     * Tùy chỉnh required/nullable theo nghiệp vụ — password là chuỗi đã mã hóa, không encrypt lại ở Action.
+     */
+    public function rules(): array
+    {
+        return [
+$RULES$
+        ];
+    }
+}
