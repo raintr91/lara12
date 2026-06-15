@@ -7,6 +7,7 @@ Base project cho kiến trúc module-first với bộ generator command tùy bi�
 - Quy ước code: [docs/CONVENTIONS.md](docs/CONVENTIONS.md)
 - Generator overview: [docs/GENERATORS.md](docs/GENERATORS.md)
 - Make command full help: [make_help.md](make_help.md)
+- Cursor AI (skill + rules): [../.cursor/skills/api-base/SKILL.md](../.cursor/skills/api-base/SKILL.md)
 
 ## Highlights
 

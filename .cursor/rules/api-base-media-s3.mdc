@@ -1,0 +1,48 @@
+---
+description: API Base — S3/media chỉ lưu path DB, domain tách .env, ghép khi expose
+globs: src/app/Support/Media/**/*,src/Modules/**/Http/Resources/**/*,src/Modules/**/Http/Actions/**/*,src/config/public_assets.php,src/config/filesystems.php
+alwaysApply: false
+---
+
+# S3 / public assets — path only
+
+## Persist (DB, Action)
+
+- **Chỉ lưu path** — không lưu full URL (`https://bucket.s3.../file.png`)
+- Format: leading slash hoặc S3 key tương đối (vd `/uploads/12/logo.png`, `assets/foo.png`)
+- Strip domain nếu FE gửi full URL trước khi ghi DB
+
+```php
+// ✅ Action — persist path
+$attributes['logo_path'] = '/uploads/12/logo.png';
+
+// ❌ Không lưu
+$attributes['logo_path'] = 'https://cdn.example.com/uploads/12/logo.png';
+```
+
+Project con có thể dùng helper `PublicAssetUrl::normalizeForStorage()`.
+
+## Expose (Resource, API response)
+
+- Ghép domain lúc **trả response** — không đọc full URL từ DB
+- Field DB: `logo_path` · Field API: `logo_url`
+
+```php
+'logo_url' => rtrim(config('public_assets.base_url'), '/').$this->logo_path,
+```
+
+## Domain / base URL — `.env`, không hardcode
+
+| Env | Vai trò |
+|-----|---------|
+| `PUBLIC_ASSET_BASE_URL` | CDN/app origin cho path public (ưu tiên) |
+| `APP_URL` | Fallback dev/local |
+| `AWS_URL` | S3 bucket URL |
+
+Config: `config('public_assets.base_url')` (project con thêm `config/public_assets.php`).
+
+Private S3: `Storage::disk('s3')->temporaryUrl($key, $expires)`.
+
+## Ngoại lệ
+
+URL **bên thứ ba** (redirect external, form ngoài) — giữ full URL; **không** áp dụng path-only.

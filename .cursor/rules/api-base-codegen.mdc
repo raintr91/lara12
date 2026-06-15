@@ -1,0 +1,24 @@
+---
+description: API Base — bắt buộc dùng m:* generators theo make_help.md
+globs: src/Modules/**/*,src/app/Models/**/*,src/app/Http/**/*
+alwaysApply: false
+---
+
+# Codegen — make_help bắt buộc
+
+**Không** tạo tay file đã có generator. Tra `src/make_help.md` cho option đầy đủ.
+
+| Cần | Lệnh |
+|-----|------|
+| Module | `m:module {Module}` |
+| Model | `m:model {Name} Platform\|Tenant` |
+| CRUD stack | `m:controller {Module} {Entity}` + `--path-model` + `--shared-model` |
+| 1 endpoint | `add:action {Module} {Entity} {action}` |
+| Select FE | `add:select-item {Module} {Entity}` |
+| 1-1 setting | `m:add-createOrUpdate {Module} {Parent} {rel} {method}` |
+| Tests | `m:module-test {Module}` |
+
+- Chạy artisan từ `src/`
+- `--skip-questions` + `yes/no` flags cho CI/non-interactive
+- `m:model-module` deprecated → dùng `m:model`
+- App model tests: `src/tests/Unit/Models/` (không trong `Modules/*/Tests`)
