@@ -14,7 +14,7 @@ Repo: **`api/`** · Laravel root: **`src/`** · Chạy artisan từ `src/`.
 
 **Docs:** `src/make_help.md` (bắt buộc), `src/docs/CONVENTIONS.md`, `src/docs/GENERATORS.md`
 
-**Cursor rules (fallback):** `.cursor/rules/api-base-*.mdc`
+**Cursor rules (fallback):** `.cursor/rules/api-base-*.mdc`, `.cursor/rules/api-code-size.mdc`
 
 ---
 
@@ -62,6 +62,17 @@ HTTP Request
 | **Service** | Orchestration **không** qua relationship | Thay thế Action cho CRUD đơn giản |
 
 Filter: `filter[field]=value` hoặc `{ "filter": { ... } }`.
+
+---
+
+## 1b. Kích thước code
+
+| Giới hạn | Ngưỡng | Vượt thì |
+|----------|--------|----------|
+| **File / class** | ~200 dòng | Tách Action method, Service, Resource, Query concern |
+| **Method** | ~20 dòng | Private methods: `transformPayload`, `syncXxx`, `applyFilters` |
+
+Action/Query phình → Service (cross-domain) hoặc `Concerns/`. Rule: `api-code-size.mdc`.
 
 ---
 
@@ -246,6 +257,7 @@ Ngoại lệ: URL bên thứ ba (redirect ngoài, form external) — giữ full 
 - [ ] `--path-model` đúng Platform vs Tenant
 - [ ] Migration đúng thư mục + `softDeletes`
 - [ ] Media/S3: path trong DB, URL ghép từ `.env` khi response
+- [ ] File ~≤200 dòng, method ~≤20 dòng — tách khi vượt
 - [ ] Test: `m:module-test` hoặc test file generator sinh ra
 
 **Chi tiết:** [reference.md](reference.md) · **make_help:** `src/make_help.md`

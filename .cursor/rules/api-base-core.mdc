@@ -47,4 +47,8 @@ php artisan m:controller {Module} {Entity} --path-model=Tenant --shared-model=ye
 php artisan add:action {Module} {Entity} search
 ```
 
+## Kích thước code
+
+File/class ~**200** dòng · method ~**20** dòng — vượt tách Action/Service/Query concern (`api-code-size.mdc`).
+
 Skill: `.cursor/skills/api-base/` · Docs: `src/docs/CONVENTIONS.md`, `src/docs/GENERATORS.md`
