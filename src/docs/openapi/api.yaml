@@ -1,0 +1,48 @@
+openapi: 3.1.0
+info:
+  title: API Base
+  version: 0.1.0
+  license:
+    name: Proprietary
+    identifier: LicenseRef-Proprietary
+  description: >
+    Local OpenAPI YAML entrypoint for API Base. Feature-level phase 3b specs
+    should generate docs/features/{slug}/02-openapi.yaml and can be bundled into
+    this file when the contract is approved.
+servers:
+  - url: http://api.base.local
+    description: Local API server
+tags:
+  - name: Health
+    description: Local documentation smoke endpoint.
+paths:
+  /health:
+    get:
+      operationId: healthCheck
+      summary: Health check placeholder
+      tags:
+        - Health
+      security: []
+      responses:
+        '200':
+          description: API is reachable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              example:
+                status: ok
+        '500':
+          description: Unexpected server error
+        '404':
+          description: Endpoint not found
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          example: ok

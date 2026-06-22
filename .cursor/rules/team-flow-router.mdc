@@ -1,0 +1,14 @@
+---
+description: Team phase 3b backend workflow. Opt-in khi user nói phase 3b/harness — không auto-load.
+alwaysApply: false
+---
+
+# Team AI Flow (API)
+
+**Opt-in** — `/api`, `/api-spec`, `/api-code`, `@team-phase3-backend`, hoặc "phase 3b".
+
+→ Router skill: `.cursor/skills/team-phase3-backend/SKILL.md`
+
+- Step 1 `/api-spec`: đọc `../portal/docs/features/{slug}/spec.yaml` + `testcases/*.yaml` → sinh `src/docs/features/{slug}/01-backend-spec.yaml`, `02-openapi.yaml`, `03-mock-data.yaml`.
+- Step 2 `/api-code`: đọc backend spec đã review + `src/make_help.md` → implement Laravel API Base bằng `m:*` generators.
+- `/api` mặc định vào Step 1 nếu chưa có backend spec được duyệt.

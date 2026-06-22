@@ -4,14 +4,26 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
-        "dev": "vite"
+        "dev": "vite",
+        "docs:dev": "vitepress dev docs --host 0.0.0.0",
+        "docs:build": "pnpm openapi:bundle && pnpm swagger:build && vitepress build docs",
+        "docs:preview": "vitepress preview docs --host 0.0.0.0",
+        "openapi:lint": "redocly lint docs/openapi/api.yaml",
+        "openapi:bundle": "redocly bundle docs/openapi/api.yaml -o docs/public/openapi/openapi.yaml",
+        "openapi:preview": "redocly preview-docs docs/openapi/api.yaml --host 0.0.0.0 --port 8081",
+        "swagger:build": "node scripts/docs/build-swagger-ui.mjs",
+        "swagger:dev": "pnpm openapi:bundle && pnpm swagger:build && pnpm docs:dev"
     },
     "devDependencies": {
+        "@redocly/cli": "^2.34.0",
         "@tailwindcss/vite": "^4.0.0",
         "axios": "^1.11.0",
         "concurrently": "^9.0.1",
         "laravel-vite-plugin": "^2.0.0",
+        "swagger-ui-dist": "^5.32.6",
         "tailwindcss": "^4.0.0",
-        "vite": "^7.0.7"
+        "vite": "^7.0.7",
+        "vitepress": "^1.6.4",
+        "yaml": "^2.9.0"
     }
 }

@@ -1,0 +1,201 @@
+# Backend API Spec Guide
+
+Guide này dùng cho Step 1 `/api-spec`: phân tích FE spec thành backend API contract.
+
+## 0. Update Spec Cũ Hay Tạo Spec Mới
+
+Team làm song song nên FE có thể update portal spec sau khi BE đã có backend spec. Mặc định:
+
+- Cùng feature slug/cụm chức năng → update spec cũ.
+- Child function thuộc aggregate cũ → update spec cũ.
+- Endpoint bổ sung cho màn mới cùng domain → update spec cũ.
+- Model/relationship bổ sung cho entity cũ → update spec cũ.
+
+Chỉ tạo spec mới nếu thay đổi là bounded feature độc lập hoặc user yêu cầu tách.
+
+Ví dụ không tạo spec mới:
+
+```text
+admin quản lý chain
+  + setting chain
+```
+
+`setting chain` là child function của aggregate `Chain`, nên update:
+
+```text
+docs/features/chain/01-backend-spec.yaml
+docs/features/chain/02-openapi.yaml
+docs/features/chain/03-mock-data.yaml
+docs/features/chain/generated/backend-spec.md
+```
+
+Mỗi lần update phải thêm `changeLog`:
+
+```yaml
+changeLog:
+  - id: CHG-CHAIN-002
+    source: portal-spec
+    summary: Add chain setting child function.
+    impact:
+      - Add hasOne ChainSetting relationship.
+      - Add PUT /admin/chains/{id}/setting endpoint.
+    breaking: false
+```
+
+Nếu BE đã implement một phần, changeLog phải ghi rõ implementation impact để Step 2 biết cần migration/action/request/resource nào phải sửa.
+
+## 1. Đọc Requirement Theo Cụm Chức Năng
+
+Không phân tích từng màn cô lập nếu feature là một cụm liên quan.
+
+Ví dụ cụm Hotel có thể gồm:
+
+- list/search
+- create
+- detail
+- edit
+- setting tabs
+- select hotel cho màn khác
+- dashboard/summary
+
+Phải hiểu cụm trước rồi mới quyết định endpoint/module.
+
+## 2. Xác Định Portal Layout
+
+Prompt có thể dẫn tới nhiều tổ chức FE:
+
+```text
+Một portal:
+  /admin/...
+  /chain/...
+  /store/...
+
+Nhiều portal:
+  admin portal
+  chain portal
+  store portal
+```
+
+Backend không map máy móc theo folder FE. Chọn module/API prefix theo actor, permission, ownership dữ liệu, và bounded context.
+
+Gợi ý:
+
+- `Admin`: quản trị platform, master data, tenant provisioning.
+- `Chain`: nghiệp vụ chuỗi/tenant owner.
+- `Store`: nghiệp vụ cửa hàng/đơn vị vận hành.
+- Module domain riêng nếu feature đủ lớn và dùng chung nhiều actor.
+
+## 3. Xác Định Entity Model
+
+Với mỗi entity, quyết định:
+
+- Platform hay Tenant.
+- Aggregate root hay child entity.
+- Có API độc lập hay chỉ thao tác qua parent.
+- Field nào fillable, field nào computed/read-only.
+- Soft delete có cần không.
+
+Platform entity:
+
+- global/master data/config.
+- model `App\Models\Platform\*`.
+- migration trong `database/migrations/platform`.
+
+Tenant entity:
+
+- dữ liệu thuộc tenant.
+- model `App\Models\Tenant\*`.
+- migration trong `database/migrations/tenant`.
+
+Pivot M-N:
+
+- không tạo model.
+- chỉ migration + `belongsToMany`.
+- sync qua Action của aggregate cha.
+
+## 4. Bóc Relationship
+
+| Relationship | Khi nào dùng | Cách implement |
+|---|---|---|
+| `belongsTo` | Entity con giữ FK tới parent | FK trên child, validate exists |
+| `hasOne` | Setting/profile 1-1 | `updateOrCreate` qua parent Action |
+| `hasMany` | Child rows thuộc aggregate | sync/create/update qua parent Action nếu không độc lập |
+| `belongsToMany` | Tag/role/category M-N | pivot migration only, `sync` qua parent Action |
+
+Nếu logic chạm nhiều aggregate không có relationship trực tiếp, dùng Service.
+
+## 5. Bóc Endpoint
+
+Màn hình thường map như sau:
+
+| UI need | Endpoint |
+|---|---|
+| List/table/search | `GET /{prefix}/{entities}` |
+| Detail | `GET /{prefix}/{entities}/{id}` |
+| Edit initial data | dùng lại detail |
+| Create form submit | `POST /{prefix}/{entities}` |
+| Edit form submit | `PUT /{prefix}/{entities}/{id}` hoặc `PATCH` |
+| Delete | `DELETE /{prefix}/{entities}/{id}` |
+| Dropdown/select | `POST /{prefix}/{entities}/select-items` |
+| HasOne setting | `PUT /{prefix}/{entities}/{id}/{setting}` |
+| Bulk action | endpoint riêng |
+| Import/export | endpoint riêng, thường Service |
+| Dashboard summary | tách theo block nếu lifecycle khác |
+
+## 6. Khi Nào Reuse API
+
+Reuse khi cùng shape, cùng permission, cùng lifecycle:
+
+- detail page + edit form current data.
+- create/edit form options dùng chung select-items.
+- list API dùng cho table và simple search nếu field đủ.
+
+Không reuse khi:
+
+- dashboard block cần cache/refresh riêng.
+- mobile/portal khác có field permission khác.
+- endpoint trả nested data nặng làm list chậm.
+- form cần data phụ không thuộc entity detail.
+
+## 7. Request / Response Contract
+
+Mỗi endpoint cần ghi:
+
+- method/path/id/purpose.
+- auth/permission.
+- query params hoặc body.
+- validation rules.
+- response resource.
+- error shape chính: 401/403/404/422.
+- reusable mock sample.
+
+Laravel 422 field errors phải align để FE map vào form.
+
+## 8. Filter / Sort / Include
+
+Search endpoint cần ghi rõ:
+
+```yaml
+query:
+  pagination: true
+  filters:
+    - name
+    - status
+  sorts:
+    - created_at
+    - name
+  includes:
+    - company
+```
+
+Chỉ expose filter/sort/include thật sự cần cho UI hoặc stable API.
+
+## 9. Definition Of Done Step 1
+
+- Có `01-backend-spec.yaml`.
+- Có `02-openapi.yaml`.
+- Có `03-mock-data.yaml`.
+- Có `generated/backend-spec.md` để review.
+- Endpoint có purpose và reusedBy rõ.
+- Entity mode và relationship đã được quyết định.
+- Open questions được ghi lại, không bị giấu trong code.

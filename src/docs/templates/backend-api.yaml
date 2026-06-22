@@ -1,0 +1,96 @@
+feature:
+  id: feature-slug
+  title: Feature Title
+  status: draft
+  version: 0.1.0
+  source:
+    portalSpec: ../portal/docs/features/feature-slug/spec.yaml
+    portalTestcases: ../portal/docs/features/feature-slug/testcases
+    updatedAt: YYYY-MM-DD
+
+changeLog:
+  - id: CHG-FEATURE-001
+    source: initial-backend-analysis
+    summary: Initial backend API contract.
+    impact:
+      - Create initial endpoint, entity, OpenAPI, and mock data plan.
+    breaking: false
+
+decisions:
+  - id: DEC-FEATURE-001
+    summary: Reuse detail endpoint for detail page and edit initial form data.
+    reason: Same permission, response shape, and lifecycle.
+
+contexts:
+  portalLayout: single-portal
+  routePrefixes:
+    admin: /admin
+  actors:
+    - admin
+
+modules:
+  - name: Admin
+    purpose: Feature APIs for admin users.
+    entities:
+      - name: FeatureEntity
+        table: feature_entities
+        mode: Tenant
+        aggregateRoot: true
+        fields:
+          - name: id
+            type: integer
+            readOnly: true
+          - name: name
+            type: string
+            required: true
+        relationships: []
+
+api:
+  endpoints:
+    - id: feature.search
+      module: Admin
+      method: GET
+      path: /admin/features
+      purpose: List feature entities for the index screen.
+      reusedBy:
+        - /features
+      auth:
+        required: true
+        permissions: []
+      query:
+        pagination: true
+        filters:
+          - name
+        sorts:
+          - created_at
+        includes: []
+      request: null
+      response: FeatureEntityCollection
+
+requests:
+  FeatureEntityCreateRequest:
+    fields:
+      - name: name
+        type: string
+        rules:
+          - required
+          - string
+          - max:255
+
+responses:
+  FeatureEntityResource:
+    fields:
+      - name: id
+        type: integer
+      - name: name
+        type: string
+
+implementationPlan:
+  generators:
+    - php artisan m:module Admin
+    - php artisan m:controller Admin FeatureEntity --create-request=yes --search-request=yes --action-class=yes --query-class=yes --resource-class=yes --wire-search=yes --wire-detail=yes --wire-create=yes --skip-questions
+  notes:
+    - Read src/make_help.md before running generators.
+
+openQuestions:
+  - Confirm Platform vs Tenant ownership.

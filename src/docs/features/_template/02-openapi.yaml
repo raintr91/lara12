@@ -1,0 +1,122 @@
+openapi: 3.1.0
+info:
+  title: Hotel Management API
+  version: 0.1.0
+  description: Example OpenAPI YAML generated from backend phase 3b spec.
+servers:
+  - url: http://localhost
+    description: Local API
+tags:
+  - name: Hotels
+paths:
+  /admin/hotels:
+    get:
+      operationId: hotelSearch
+      summary: List hotels
+      tags:
+        - Hotels
+      parameters:
+        - in: query
+          name: filter[name]
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Hotel collection
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HotelCollection'
+    post:
+      operationId: hotelCreate
+      summary: Create hotel
+      tags:
+        - Hotels
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HotelCreateRequest'
+      responses:
+        '201':
+          description: Hotel created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HotelResource'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+  /admin/hotels/{id}:
+    get:
+      operationId: hotelDetail
+      summary: Get hotel detail
+      tags:
+        - Hotels
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Hotel detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HotelResource'
+        '404':
+          description: Hotel not found
+components:
+  schemas:
+    Hotel:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Hotel Sakura
+    HotelResource:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Hotel'
+    HotelCollection:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Hotel'
+        meta:
+          type: object
+    HotelCreateRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          maxLength: 255
+          example: Hotel Sakura
+    ValidationError:
+      type: object
+      properties:
+        message:
+          type: string
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string

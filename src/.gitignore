@@ -36,6 +36,10 @@
 /vendor
 /coverage
 /clover.xml
+/docs/.vitepress/dist
+/docs/.vitepress/.temp
+/docs/public/openapi/openapi.yaml
+/docs/public/swagger
 Homestead.json
 Homestead.yaml
 Thumbs.db

@@ -1,0 +1,44 @@
+feature: hotel
+mocks:
+  hotel.search.success:
+    endpoint: hotel.search
+    status: 200
+    response:
+      data:
+        - id: 1
+          name: Hotel Sakura
+        - id: 2
+          name: Hotel Lotus
+      meta:
+        current_page: 1
+        per_page: 15
+        total: 2
+
+  hotel.detail.success:
+    endpoint: hotel.detail
+    status: 200
+    response:
+      data:
+        id: 1
+        name: Hotel Sakura
+
+  hotel.create.success:
+    endpoint: hotel.create
+    status: 201
+    request:
+      name: Hotel Sakura
+    response:
+      data:
+        id: 1
+        name: Hotel Sakura
+
+  hotel.create.validation:
+    endpoint: hotel.create
+    status: 422
+    request:
+      name: ''
+    response:
+      message: The given data was invalid.
+      errors:
+        name:
+          - The name field is required.

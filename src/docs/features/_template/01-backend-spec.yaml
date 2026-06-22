@@ -1,0 +1,128 @@
+feature:
+  id: hotel
+  title: Hotel Management
+  status: draft
+  version: 0.1.0
+  source:
+    portalSpec: ../portal/docs/features/hotel/spec.yaml
+    portalTestcases: ../portal/docs/features/hotel/testcases
+    updatedAt: 2026-06-22
+
+changeLog:
+  - id: CHG-HOTEL-001
+    source: initial-backend-analysis
+    summary: Initial backend contract for hotel list, detail, and create.
+    impact:
+      - Add Hotel entity contract.
+      - Add search, detail, and create endpoints.
+    breaking: false
+
+decisions:
+  - id: DEC-HOTEL-001
+    summary: Reuse hotel.detail for detail page and edit initial form data.
+    reason: Same permission, response shape, and lifecycle.
+
+contexts:
+  portalLayout: single-portal
+  routePrefixes:
+    admin: /admin
+  actors:
+    - admin
+
+modules:
+  - name: Admin
+    purpose: Admin APIs for hotel management.
+    entities:
+      - name: Hotel
+        table: hotels
+        mode: Platform
+        aggregateRoot: true
+        fields:
+          - name: id
+            type: integer
+            readOnly: true
+          - name: name
+            type: string
+            required: true
+        relationships: []
+
+api:
+  endpoints:
+    - id: hotel.search
+      module: Admin
+      method: GET
+      path: /admin/hotels
+      purpose: List hotels for the index screen.
+      reusedBy:
+        - /hotels
+      auth:
+        required: true
+        permissions: []
+      query:
+        pagination: true
+        filters:
+          - name
+        sorts:
+          - created_at
+        includes: []
+      request: null
+      response: HotelCollection
+
+    - id: hotel.detail
+      module: Admin
+      method: GET
+      path: /admin/hotels/{id}
+      purpose: Get hotel detail and edit initial form data.
+      reusedBy:
+        - /hotels/{id}
+        - /hotels/{id}/edit
+      auth:
+        required: true
+        permissions: []
+      response: HotelResource
+
+    - id: hotel.create
+      module: Admin
+      method: POST
+      path: /admin/hotels
+      purpose: Create a hotel.
+      reusedBy:
+        - /hotels/create
+      auth:
+        required: true
+        permissions: []
+      request: HotelCreateRequest
+      response: HotelResource
+
+requests:
+  HotelCreateRequest:
+    fields:
+      - name: name
+        type: string
+        rules:
+          - required
+          - string
+          - max:255
+
+responses:
+  HotelResource:
+    fields:
+      - name: id
+        type: integer
+      - name: name
+        type: string
+
+  HotelCollection:
+    wraps: HotelResource
+    pagination: true
+
+implementationPlan:
+  generators:
+    - php artisan m:module Admin
+    - php artisan m:controller Admin Hotel --shared-model=yes --path-model=Platform --create-request=yes --search-request=yes --action-class=yes --query-class=yes --resource-class=yes --wire-search=yes --wire-detail=yes --wire-create=yes --skip-questions
+  notes:
+    - Read src/make_help.md before running generators.
+    - Detail endpoint is reused for edit current data.
+
+openQuestions:
+  - Confirm whether Hotel is Platform or Tenant-owned in the real product.
