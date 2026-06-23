@@ -124,6 +124,31 @@ Pivot M-N:
 
 Nếu logic chạm nhiều aggregate không có relationship trực tiếp, dùng Service.
 
+## 4b. Service Hashtags
+
+### `#call-external`
+
+Dùng khi API gọi/nhận dữ liệu từ bên thứ ba: payment, webhook, SMS, shipping, OAuth, ERP.
+
+- Spec thêm `tags: [call-external]` và `externalCalls`.
+- OpenAPI thêm tag `call-external` và `x-external-calls`.
+- Code sinh Service/integration client.
+- Không đặt external HTTP call trong Action, Query, Controller, Request, Resource.
+
+### `#cross-entity-service`
+
+Dùng rất ít khi một API cần xử lý 2 entity nội bộ độc lập.
+
+Trước khi dùng phải loại trừ:
+
+1. Có Eloquent relationship → dùng parent Action/Query và relationship APIs.
+2. Entity thứ 2 chỉ là side effect, FE không cần result → dùng Event/Observer/Job.
+3. Có thể tách API an toàn → tách API.
+
+Nếu vẫn cần synchronous orchestration, spec thêm `tags: [cross-entity-service]`, `services`, endpoint `serviceRefs`, và ghi `alternativesConsidered`.
+
+Code vẫn có Action/Query cho API entry; Action/Query gọi Service cho phần orchestration.
+
 ## 5. Bóc Endpoint
 
 Màn hình thường map như sau:

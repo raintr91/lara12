@@ -1,7 +1,6 @@
 ---
 description: API Base — entity modes, pivot M-N không model, relationship vs Service
-globs: src/app/Models/**/*,src/Modules/**/Models/**/*,src/database/migrations/**/*
-alwaysApply: false
+alwaysApply: true
 ---
 
 # Entity & relationship rules

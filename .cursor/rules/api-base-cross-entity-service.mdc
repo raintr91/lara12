@@ -1,0 +1,14 @@
+---
+description: Rare cross-entity service orchestration rule
+alwaysApply: true
+---
+
+# #cross-entity-service
+
+Opt-in khi spec/prompt có `#cross-entity-service` hoặc một API cần xử lý 2 entity độc lập.
+
+- Trước hết tìm cách triệt tiêu: dùng Eloquent relationship nếu có quan hệ; dùng Event/Observer/Job nếu entity thứ 2 chỉ là side effect; tách API nếu an toàn.
+- Chỉ dùng Service khi cần orchestration đồng bộ, atomic/result trả FE, và có lý do rõ.
+- Spec: thêm tag `cross-entity-service`, `services`, endpoint `serviceRefs`, và `alternativesConsidered`.
+- OpenAPI: thêm tag `cross-entity-service` và `x-services`.
+- Code: vẫn có Action/Query cho API entry; Action/Query gọi Service cho phần cross-entity. Không thay CRUD đơn entity bằng Service.

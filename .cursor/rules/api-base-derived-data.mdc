@@ -1,0 +1,73 @@
+---
+description: API Base — backend-only derived fields/tables for search, compute, static snapshots
+alwaysApply: true
+---
+
+# Derived / Denormalized Data
+
+Dùng khi BE cần thêm field/table không có trong FE spec để tối ưu search, sort, tính toán, hoặc API static.
+
+## Khi được dùng
+
+- Field dư để search/sort nhanh: `search_text`, `normalized_name`, `total_amount`, `item_count`.
+- Kết quả tính toán đắt tiền: summary, aggregate, counter, score.
+- Bảng static/snapshot/cache để API đọc nhanh, chấp nhận không realtime.
+- Tối ưu query khi relationship/join trực tiếp quá nặng.
+
+## Điều kiện bắt buộc
+
+- Ghi trong backend spec: `backendOnly: true`.
+- Ghi source of truth: field/table sinh từ đâu.
+- Ghi refresh strategy: Action, Observer, Job, Command, Scheduler, Seeder.
+- Ghi staleness policy nếu không realtime.
+- Không expose OpenAPI nếu FE không cần biết; nếu expose thì ghi rõ `derived/computed`.
+- Không dùng derived table để che thiết kế relationship sai.
+
+## Spec format
+
+```yaml
+derivedData:
+  - id: chain.searchText
+    type: field
+    target: chains.search_text
+    backendOnly: true
+    purpose: Speed up keyword search.
+    sourceOfTruth:
+      - chains.name
+      - chains.code
+      - chain_profiles.phone
+    refresh:
+      strategy: observer
+      realtime: true
+    index:
+      required: true
+      type: fulltext
+```
+
+```yaml
+derivedData:
+  - id: static.chainSummary
+    type: table
+    target: chain_static_summaries
+    backendOnly: true
+    purpose: Serve static dashboard APIs faster.
+    sourceOfTruth:
+      - chains
+      - stores
+      - orders
+    refresh:
+      strategy: scheduler
+      command: chain:rebuild-static-summary
+      frequency: every_15_minutes
+      realtime: false
+      acceptableStaleness: 15 minutes
+```
+
+## Implementation
+
+- Field dư cùng aggregate → migration/model entity chính.
+- Snapshot/static table query độc lập → model riêng nếu cần.
+- Realtime đơn giản → Action private method hoặc Observer.
+- Refresh nặng → Job/Command/Scheduler.
+- Không seed data trong migration; static seed dùng Seeder/Command.
+- Thêm index phù hợp nếu mục tiêu là search/sort nhanh.

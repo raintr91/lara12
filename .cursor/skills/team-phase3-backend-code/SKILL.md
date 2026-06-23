@@ -27,6 +27,11 @@ src/docs/GENERATORS.md
 
 Also use `.cursor/skills/api-base/SKILL.md`.
 
+If the spec contains special tags, read the matching skill:
+
+- `call-external` → `.cursor/skills/call-external/SKILL.md`
+- `cross-entity-service` → `.cursor/skills/cross-entity-service/SKILL.md`
+
 ## Required Order
 
 1. Read `src/make_help.md` before creating classes.
@@ -50,6 +55,13 @@ Also use `.cursor/skills/api-base/SKILL.md`.
 - Service is for cross-domain or unrelated orchestration only.
 - Pivot M-N has no model.
 - S3/media stores path only, response may expose URL.
+
+## Service Tags
+
+- `call-external`: generate Service/integration client; do not put external HTTP calls in Action, Query, Controller, Request, or Resource.
+- `cross-entity-service`: keep Action/Query as API entry; Action/Query may call Service for rare synchronous orchestration across independent entities.
+- If two entities have an Eloquent relationship, do not use `cross-entity-service`; use parent Action/Query and Laravel relationship APIs.
+- If the second entity is only a side effect not needed by FE response, prefer Event/Observer/Job before Service.
 
 ## Verify
 

@@ -134,6 +134,27 @@ Service chỉ dùng cho logic cross-domain hoặc external integration, không t
 - Pivot M-N không có model, sync qua relationship trên Action cha.
 - Child hasMany/hasOne có model nếu là entity thật, nhưng thao tác qua aggregate cha nếu không độc lập.
 
+## Service Hashtags
+
+Step 1 có thể đánh dấu endpoint bằng hashtag để Step 2 sinh code đúng tầng.
+
+### `#call-external`
+
+Dùng cho payment, webhook, shipping, SMS, OAuth, ERP, hoặc third-party API.
+
+- Backend spec: thêm `call-external`, `externalCalls`, endpoint `externalCallRefs`.
+- OpenAPI: thêm tag `call-external`, `x-external-calls`.
+- Code: sinh Service/integration client; không đặt external HTTP call trong Action/Query/Controller/Request/Resource.
+
+### `#cross-entity-service`
+
+Dùng rất ít khi một API cần orchestration 2 entity nội bộ độc lập.
+
+- Trước hết phải thử thay bằng Eloquent relationship, Event/Observer/Job, hoặc tách API.
+- Backend spec: thêm `cross-entity-service`, `services`, endpoint `serviceRefs`, `alternativesConsidered`.
+- OpenAPI: thêm tag `cross-entity-service`, `x-services`.
+- Code: vẫn có Action/Query cho API entry; Action/Query gọi Service cho phần orchestration.
+
 ## Swagger / OpenAPI
 
 OpenAPI được viết bằng YAML, không dùng decorator/annotation trong Laravel.

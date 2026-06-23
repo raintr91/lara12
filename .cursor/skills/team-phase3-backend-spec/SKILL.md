@@ -61,6 +61,18 @@ If `src/docs/features/{slug}/01-backend-spec.yaml` already exists, update it in 
 9. Generate OpenAPI YAML and mock data from the backend spec.
 10. Record open questions instead of guessing silently.
 
+## Hashtag Skills
+
+If Portal spec, backend prompt, or testcase mentions these hashtags, read and apply the matching skill:
+
+- `#call-external` → `.cursor/skills/call-external/SKILL.md`
+- `#cross-entity-service` → `.cursor/skills/cross-entity-service/SKILL.md`
+
+When applied, the hashtag must appear in both backend spec and OpenAPI:
+
+- Backend spec: top-level `tags`, endpoint `tags`, and matching `externalCalls` or `services`.
+- OpenAPI: operation `tags` and vendor extension `x-external-calls` or `x-services`.
+
 ## Spec Evolution Rules
 
 When Portal spec/testcases changed after BE spec was created:

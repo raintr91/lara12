@@ -1,7 +1,6 @@
 ---
 description: API Base — module HTTP layer (Controller, Action, Query, Request)
-globs: src/Modules/**/Http/**/*
-alwaysApply: false
+alwaysApply: true
 ---
 
 # Module HTTP layer

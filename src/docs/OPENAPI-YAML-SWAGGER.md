@@ -93,3 +93,44 @@ generated/backend-spec.md
 ```
 
 Không cập nhật Swagger bằng decorator trong Controller.
+
+## Service Tags
+
+Một số endpoint cần metadata ngoài OpenAPI chuẩn để FE/BE review dependency:
+
+### `#call-external`
+
+Dùng khi API gọi hoặc nhận dữ liệu từ hệ thống bên thứ ba.
+
+```yaml
+paths:
+  /admin/orders/{id}/pay:
+    post:
+      tags:
+        - Orders
+        - call-external
+      x-external-calls:
+        - provider: Stripe
+          service: CreatePaymentIntentService
+          direction: outbound
+          idempotencyRequired: true
+```
+
+### `#cross-entity-service`
+
+Dùng rất ít, khi một API phải orchestration 2 entity nội bộ độc lập và không thể thay bằng relationship/event/split API.
+
+```yaml
+paths:
+  /admin/chains/{id}/activate:
+    post:
+      tags:
+        - Chains
+        - cross-entity-service
+      x-services:
+        - class: ActivateChainWithDefaultStoreService
+          entities:
+            - Chain
+            - Store
+          reason: Synchronous cross-aggregate orchestration.
+```

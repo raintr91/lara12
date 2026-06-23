@@ -22,6 +22,8 @@ decisions:
     summary: Reuse hotel.detail for detail page and edit initial form data.
     reason: Same permission, response shape, and lifecycle.
 
+tags: []
+
 contexts:
   portalLayout: single-portal
   routePrefixes:
@@ -67,6 +69,9 @@ api:
         includes: []
       request: null
       response: HotelCollection
+      tags: []
+      externalCallRefs: []
+      serviceRefs: []
 
     - id: hotel.detail
       module: Admin
@@ -80,6 +85,9 @@ api:
         required: true
         permissions: []
       response: HotelResource
+      tags: []
+      externalCallRefs: []
+      serviceRefs: []
 
     - id: hotel.create
       module: Admin
@@ -93,6 +101,13 @@ api:
         permissions: []
       request: HotelCreateRequest
       response: HotelResource
+      tags: []
+      externalCallRefs: []
+      serviceRefs: []
+
+externalCalls: []
+
+services: []
 
 requests:
   HotelCreateRequest:

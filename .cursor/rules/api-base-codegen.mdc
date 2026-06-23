@@ -1,7 +1,6 @@
 ---
 description: API Base — bắt buộc dùng m:* generators theo make_help.md
-globs: src/Modules/**/*,src/app/Models/**/*,src/app/Http/**/*
-alwaysApply: false
+alwaysApply: true
 ---
 
 # Codegen — make_help bắt buộc

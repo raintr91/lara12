@@ -33,6 +33,16 @@ Example output for Step 1 `/api-spec`.
 | `hotel.detail` | GET | `/admin/hotels/{id}` | Detail and edit current data | `/hotels/{id}`, `/hotels/{id}/edit` |
 | `hotel.create` | POST | `/admin/hotels` | Create hotel | `/hotels/create` |
 
+## Service Tags
+
+No `#call-external` or `#cross-entity-service` tags in this example.
+
+When present, this section must list:
+
+- `externalCalls` for third-party integrations.
+- `services` for rare cross-entity orchestration.
+- OpenAPI vendor extensions: `x-external-calls` or `x-services`.
+
 ## Request
 
 `HotelCreateRequest`

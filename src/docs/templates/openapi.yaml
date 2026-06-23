@@ -6,6 +6,12 @@ info:
 servers:
   - url: http://localhost
     description: Local API
+tags:
+  - name: Feature
+  - name: call-external
+    description: Endpoint depends on a third-party integration.
+  - name: cross-entity-service
+    description: Endpoint uses a reviewed internal cross-entity service.
 paths:
   /admin/features:
     get:

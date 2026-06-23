@@ -240,6 +240,24 @@ pnpm swagger:dev
 
 ---
 
+## Service Hashtags
+
+Hai hashtag đặc biệt:
+
+```text
+#call-external
+  payment / webhook / SMS / shipping / OAuth / ERP
+  → Service only cho external integration
+
+#cross-entity-service
+  2 entity nội bộ độc lập, rất ít dùng
+  → Action/Query entry + Service orchestration
+```
+
+Nếu có relationship thì dùng Eloquent relationship. Nếu chỉ là side effect thì ưu tiên Event/Observer/Job.
+
+---
+
 ## VitePress Local Docs
 
 Chạy:

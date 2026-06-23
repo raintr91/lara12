@@ -1,7 +1,6 @@
 ---
 description: API Base — S3/media chỉ lưu path DB, domain tách .env, ghép khi expose
-globs: src/app/Support/Media/**/*,src/Modules/**/Http/Resources/**/*,src/Modules/**/Http/Actions/**/*,src/config/public_assets.php,src/config/filesystems.php
-alwaysApply: false
+alwaysApply: true
 ---
 
 # S3 / public assets — path only

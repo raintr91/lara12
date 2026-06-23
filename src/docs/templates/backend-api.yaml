@@ -21,6 +21,8 @@ decisions:
     summary: Reuse detail endpoint for detail page and edit initial form data.
     reason: Same permission, response shape, and lifecycle.
 
+tags: []
+
 contexts:
   portalLayout: single-portal
   routePrefixes:
@@ -66,6 +68,42 @@ api:
         includes: []
       request: null
       response: FeatureEntityCollection
+      tags: []
+      externalCallRefs: []
+      serviceRefs: []
+
+externalCalls: []
+# Use only with #call-external.
+# Example:
+# - id: payment.createIntent
+#   provider: Stripe
+#   direction: outbound
+#   trigger: POST /admin/orders/{id}/pay
+#   purpose: Create payment intent.
+#   service: Modules\Order\Services\Payment\CreatePaymentIntentService
+#   timeoutMs: 10000
+#   retry:
+#     enabled: false
+#     reason: Payment retry requires idempotency.
+#   idempotency:
+#     required: true
+#     key: order_payment_attempt_id
+#   secrets:
+#     - PAYMENT_PROVIDER_SECRET
+
+services: []
+# Use only with #cross-entity-service.
+# Example:
+# - id: chain.activateWithDefaultStore
+#   class: Modules\Chain\Services\ActivateChainWithDefaultStoreService
+#   reason: Chain and Store are independent aggregates but must be activated in one operation.
+#   alternativesConsidered:
+#     - Eloquent relationship: not applicable
+#     - Event/Observer/Job: rejected because FE needs synchronous result
+#     - Split APIs: rejected because operation must be atomic
+#   entities:
+#     - Chain
+#     - Store
 
 requests:
   FeatureEntityCreateRequest:

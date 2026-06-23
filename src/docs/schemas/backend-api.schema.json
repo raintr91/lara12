@@ -44,6 +44,10 @@
         }
       }
     },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
     "contexts": {
       "type": "object",
       "properties": {
@@ -103,8 +107,62 @@
               "auth": { "type": "object" },
               "query": { "type": "object" },
               "request": {},
-              "response": {}
+              "response": {},
+              "tags": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "externalCallRefs": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "serviceRefs": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
             }
+          }
+        }
+      }
+    },
+    "externalCalls": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "provider", "direction", "purpose", "service"],
+        "properties": {
+          "id": { "type": "string" },
+          "provider": { "type": "string" },
+          "direction": { "enum": ["outbound", "inbound-webhook"] },
+          "trigger": { "type": "string" },
+          "purpose": { "type": "string" },
+          "service": { "type": "string" },
+          "timeoutMs": { "type": "integer" },
+          "retry": { "type": "object" },
+          "idempotency": { "type": "object" },
+          "secrets": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    },
+    "services": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "class", "reason", "entities"],
+        "properties": {
+          "id": { "type": "string" },
+          "class": { "type": "string" },
+          "reason": { "type": "string" },
+          "alternativesConsidered": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "entities": {
+            "type": "array",
+            "items": { "type": "string" }
           }
         }
       }
