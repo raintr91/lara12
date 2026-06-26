@@ -1,14 +1,14 @@
 ---
-description: Team phase 3b backend workflow. Opt-in khi user nói phase 3b/harness — không auto-load.
+description: Team backend workflow router — opt-in commands
 alwaysApply: false
 ---
 
 # Team AI Flow (API)
 
-**Opt-in** — `/api`, `/api-spec`, `/api-code`, `@team-phase3-backend`, hoặc "phase 3b".
+**Opt-in** — `/api`, `/api-spec`, `/grill-api-spec`, `/api-code`.
 
-→ Router skill: `.cursor/skills/team-phase3-backend/SKILL.md`
+→ Router: `.cursor/skills/api/SKILL.md`  
+→ Doc: `src/docs/TEAM-AI-BACKEND-WORKFLOW.md`  
+→ Extracts: `.cursor/extracts/`
 
-- Step 1 `/api-spec`: đọc `../portal/docs/features/{slug}/spec.yaml` + `testcases/*.yaml` → sinh `src/docs/features/{slug}/01-backend-spec.yaml`, `02-openapi.yaml`, `03-mock-data.yaml`.
-- Step 2 `/api-code`: đọc backend spec đã review + `src/make_help.md` → implement Laravel API Base bằng `m:*` generators.
-- `/api` mặc định vào Step 1 nếu chưa có backend spec được duyệt.
+One session = one command. Portal FE specs: `../portal/docs/features/{slug}/`.

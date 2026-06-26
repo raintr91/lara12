@@ -2,3 +2,12 @@
 .env.docker
 prod/.env
 stg/.env
+
+# Local project mappings for AI workflow
+.cursor/legacy-projects.local.json
+.cursor/team-projects.local.json
+
+# Local AI vendor skills/rules (installed per member, do not commit)
+.cursor/skills/vendor/
+.cursor/rules-vendor/
+.cursor/skills-vendor/

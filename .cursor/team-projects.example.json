@@ -1,0 +1,65 @@
+{
+  "defaultGroup": "portal-stack",
+  "groups": {
+    "portal-stack": {
+      "description": "Portal FE and API BE that usually change together",
+      "primary": "api-be",
+      "projects": ["portal-fe", "api-be"],
+      "contract": {
+        "frontend": "portal-fe",
+        "backend": "api-be",
+        "sourceOfTruth": "backend-model-database"
+      }
+    },
+    "erp-suite": {
+      "description": "Example suite with multiple related apps",
+      "primary": "erp-api",
+      "projects": ["erp-web", "erp-api", "erp-worker", "erp-legacy-admin"],
+      "contract": {
+        "frontend": "erp-web",
+        "backend": "erp-api",
+        "sourceOfTruth": "backend-model-database"
+      }
+    }
+  },
+  "projects": {
+    "portal-fe": {
+      "root": "../portal",
+      "role": "frontend",
+      "repo": "portal",
+      "skill": "portal-base",
+      "write": true
+    },
+    "api-be": {
+      "root": ".",
+      "role": "backend",
+      "repo": "api",
+      "skill": "api-base",
+      "write": true
+    },
+    "erp-web": {
+      "root": "/home/your-user/workspace/erp-web",
+      "role": "frontend",
+      "repo": "portal",
+      "skill": "portal-base",
+      "write": true
+    },
+    "erp-api": {
+      "root": "/home/your-user/workspace/erp-api",
+      "role": "backend",
+      "repo": "api",
+      "skill": "api-base",
+      "write": true
+    },
+    "erp-worker": {
+      "root": "/home/your-user/workspace/erp-worker",
+      "role": "worker",
+      "write": true
+    },
+    "erp-legacy-admin": {
+      "root": "/home/your-user/workspace/erp-legacy-admin",
+      "role": "legacy",
+      "write": false
+    }
+  }
+}

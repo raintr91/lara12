@@ -280,18 +280,24 @@ Review được workflow, generated backend specs, OpenAPI guide và slide này.
 ## Skills
 
 ```text
-team-phase3-backend-spec
+api-spec
   Step 1: requirement → backend contract
 
-team-phase3-backend-code
+grill-api-spec
+  Audit contract trước khi code (khuyến nghị)
+
+api-code
   Step 2: approved contract → Laravel code
 ```
 
 Router:
 
 - `/api-spec` hoặc "phase 3b spec" → Step 1.
+- `/grill-api-spec` → audit contract (optional, recommended).
 - `/api-code` hoặc "implement backend theo spec" → Step 2.
 - `/api` mặc định vào Step 1 nếu chưa có backend spec.
+
+Legacy `team-phase3-backend-spec` / `team-phase3-backend-code` → dùng skills trên.
 
 ---
 

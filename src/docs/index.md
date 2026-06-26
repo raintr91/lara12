@@ -13,6 +13,8 @@ Backend docs dùng hai lớp:
 - [Backend Phase 3b Slides](./presentations/team-backend-phase3b-slides.md)
 - [Generated Feature Docs](./generated.md)
 
+Portal FE workflow: `../../portal/docs/operational/TEAM-AI-WORKFLOW.md`
+
 ## Commands
 
 ```bash

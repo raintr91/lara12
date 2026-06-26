@@ -1,0 +1,36 @@
+---
+description: API Base — core invariants. Details in extracts and glob rules.
+alwaysApply: true
+---
+
+# API Invariants
+
+Laravel 12 module-first — repo **`api/`**, code **`src/`**. Read `src/make_help.md` before creating classes.
+
+## Layer
+
+`Controller` → `Request` / `Action` / `Query` / `Resource` → `Model`
+
+- Controller: thin traits only
+- Action: mutate + relationship sync
+- Query: search/detail, filters/sorts/includes
+- Service: cross-domain or external only — not CRUD with Eloquent relation
+- OpenAPI source is YAML — no Laravel OpenAPI decorators
+
+## Entity
+
+Platform / Tenant / pivot M-N (no model). Detail: `.cursor/extracts/entity-relationship.md`
+
+## Media
+
+S3/public: path in DB, URL at response. Detail: `.cursor/extracts/media-s3.md`
+
+## Code size (soft)
+
+File/class ~**200** lines · method ~**20** lines — split when exceeded. Detail: `api-code-size.mdc` (glob).
+
+## Codegen
+
+Use `m:*` / `add:*` generators — no hand scaffold when generator exists. Detail: `.cursor/extracts/codegen.md`
+
+Skill: `.cursor/skills/api-base/` · Docs: `src/docs/CONVENTIONS.md`, `src/docs/GENERATORS.md`

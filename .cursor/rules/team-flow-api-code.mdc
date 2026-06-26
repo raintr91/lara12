@@ -1,0 +1,15 @@
+---
+description: /api-code — Laravel implementation from approved backend spec
+globs: src/Modules/**/*
+alwaysApply: false
+---
+
+# Team Flow — API Code
+
+Active command: `/api-code` — `.cursor/skills/api-code/SKILL.md`
+
+After `/api-spec` (+ `/grill-api-spec` when needed). Extracts: `codegen.md`, `http-layer.md`, `entity-relationship.md`, `media-s3.md`, `verify-gate.md`
+
+- Input: approved `src/docs/features/{slug}/01-backend-spec.yaml`
+- Read `src/make_help.md`; use `m:*` generators
+- Verify: `php artisan test --filter={Module}`

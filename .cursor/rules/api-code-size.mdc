@@ -1,53 +1,22 @@
 ---
-description: API Base — giới hạn ~200 dòng/file, ~20 dòng/method; vượt thì tách
-alwaysApply: true
+description: API Base — ~200 lines/file, ~20 lines/method; split when exceeded
+globs: src/**/*.{php,yaml,yml}
+alwaysApply: false
 ---
 
-# Kích thước code (API)
+# Code Size (API)
 
-Ngưỡng **mềm** — áp dụng `src/`. Vượt → tách class/method/file trong cùng PR.
+Soft limits on `src/` — split in same PR when exceeded.
 
-## File / class — ~200 dòng
+| Vượt ~200 | Tách |
+|-----------|------|
+| Action | Private methods; sync → trait; large orchestration → Service |
+| Query | Filter/sort/include concerns |
+| Service | One use-case per class |
+| Request / Resource | Child classes or nested resources |
 
-| Vượt ~200 | Tách theo |
-|-----------|-----------|
-| **Action** | Private methods; sync relation → trait/concern; orchestration lớn → **Service** |
-| **Query** | Filter/sort/include → class riêng hoặc concern `AppliesXxxFilters` |
-| **Controller** | Đã thin — nếu phình → logic xuống Action/Query |
-| **Service** | Mỗi service một use-case; pipeline → nhiều class nhỏ |
-| **Request** | `rules()` dài → Form Request con hoặc rule array file riêng |
-| **Resource** | Nested resource class; `whenLoaded` blocks → resource con |
-| **Migration** | Chỉ schema; seed data → seeder khác |
+| Vượt ~20 method | Tách |
+|-----------------|------|
+| create/update | `transformPayload()`, `syncRelations()` |
 
-## Method — ~20 dòng
-
-| Vượt ~20 | Tách thành |
-|----------|------------|
-| `create`/`update` | `transformPayload()`, `syncRelations()`, `validateBusinessRules()` |
-| Import/sync | Step methods private hoặc Service |
-| Query builder | `applyFilters()`, `applySorts()` |
-
-```php
-// ✅ Action ngắn
-public function create(array $data): mixed
-{
-    return $this->transaction(fn () => $this->createWithRelations($data));
-}
-
-private function createWithRelations(array $data): Model { ... }
-```
-
-## Module layout gợi ý khi phình
-
-```
-Http/Actions/HotelAction.php          # CRUD chính
-Http/Actions/Concerns/SyncsHotelTags.php
-Services/HotelImportService.php       # cross-domain / dài
-```
-
-## Ngoại lệ
-
-- Generated test/stub — dùng generator
-- Config array dài không logic — file config, không nhét vào Action
-
-Skill: `.cursor/skills/api-base/SKILL.md`
+Extract: `.cursor/extracts/http-layer.md` for layer boundaries.

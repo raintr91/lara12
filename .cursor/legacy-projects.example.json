@@ -1,0 +1,18 @@
+{
+  "defaultProject": "portal-legacy",
+  "projects": {
+    "portal-legacy": {
+      "root": "/home/your-user/workspace/portal-legacy",
+      "description": "Main legacy portal application",
+      "defaultFeatureBase": "docs/features"
+    },
+    "crm-legacy": {
+      "root": "/home/your-user/workspace/crm-legacy",
+      "description": "Legacy CRM application"
+    },
+    "booking-legacy": {
+      "root": "../booking-legacy",
+      "description": "Legacy booking application, relative to current workspace"
+    }
+  }
+}

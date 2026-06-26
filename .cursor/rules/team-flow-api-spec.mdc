@@ -1,0 +1,20 @@
+---
+description: /api-spec, /grill-api-spec — backend contract YAML only
+globs: src/docs/features/**/*
+alwaysApply: false
+---
+
+# Team Flow — API Spec
+
+Active commands: `/api-spec`, `/grill-api-spec` — one per session.
+
+| Command | Skill |
+|---------|-------|
+| `/api-spec` | `.cursor/skills/api-spec/SKILL.md` |
+| `/grill-api-spec` | `.cursor/skills/grill-api-spec/SKILL.md` |
+
+Extracts: `spec-evolution.md`, `entity-relationship.md`, `derived-data.md`, `call-external.md`, `cross-entity-service.md`
+
+- Input: Portal `docs/features/{slug}/` spec + testcases
+- Output: `src/docs/features/{slug}/01-backend-spec.yaml`, `02-openapi.yaml`, `03-mock-data.yaml`
+- **Không** scaffold Laravel trong phase này

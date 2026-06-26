@@ -14,7 +14,9 @@ Repo: **`api/`** · Laravel root: **`src/`** · Chạy artisan từ `src/`.
 
 **Docs:** `src/make_help.md` (bắt buộc), `src/docs/CONVENTIONS.md`, `src/docs/GENERATORS.md`
 
-**Cursor rules (fallback):** `.cursor/rules/api-base-*.mdc`, `.cursor/rules/api-code-size.mdc`
+**Cursor rules:** `api-invariants.mdc`, `api-code-size.mdc`, `api-base-*.mdc` (legacy globs if any)
+
+**Extracts:** `.cursor/extracts/` — entity, http-layer, codegen, media-s3, hashtags
 
 ---
 
