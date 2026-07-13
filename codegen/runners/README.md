@@ -1,6 +1,6 @@
 # API codegen (`api-gen`)
 
-Mirror `portal:gen` — đọc `01-backend-spec.yaml`, map tags qua `shared/api-codegen.registry.json`, sinh lệnh `php artisan m:*` / `add:*`, stub Service, `generated/codegen.manifest.json` + `HANDOFF.md`.
+Mirror `portal:gen` — đọc `01-backend-spec.yaml`, map tags qua `registries/codegen.registry.json`, sinh lệnh `php artisan m:*` / `add:*`, stub Service, `generated/codegen.manifest.json` + `HANDOFF.md`.
 
 Chạy từ **repo root**:
 
@@ -38,7 +38,7 @@ Khi chạy lại, script **phân tích `src/`** rồi chỉ sinh lệnh còn thi
 
 | Output | Mô tả |
 |--------|--------|
-| `shared/api-codegen.registry.json` | Tag → artisan command / HANDOFF phase (tham khảo Portal registry) |
+| `registries/codegen.registry.json` | Tag → artisan command / HANDOFF phase (tham khảo Portal registry) |
 | `generated/codegen.manifest.json` | Tag plan, commands, manual items — agent đọc trước HANDOFF |
 | `generated/HANDOFF.md` | Checklist `#manual-*` sau khi generators chạy |
 

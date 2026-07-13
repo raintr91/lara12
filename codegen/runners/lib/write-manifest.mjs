@@ -24,7 +24,7 @@ export function buildCodegenManifest({
     module: plan.ctx.module,
     entity: plan.ctx.entity,
     pathModel: plan.ctx.pathModel,
-    registry: registry.registryPath ?? 'shared/api-codegen.registry.json',
+    registry: registry.registryPath ?? 'registries/codegen.registry.json',
     wire: spec.codegen?.wire ?? null,
     tags: spec.tags ?? [],
     tagPlan,

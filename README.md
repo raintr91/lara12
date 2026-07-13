@@ -48,7 +48,7 @@ pnpm docs:preview
 | **API Base** | [docs/api-base/index.md](docs/api-base/index.md) |
 | **Feature contracts** | [docs/api-base/generated.md](docs/api-base/generated.md) |
 
-Scripts: [scripts/docs/README.md](scripts/docs/README.md) · Codegen: [scripts/api-gen/README.md](scripts/api-gen/README.md)
+Scripts: [scripts/docs/README.md](scripts/docs/README.md) · Codegen: [codegen/runners/README.md](codegen/runners/README.md)
 
 Portal FE: [../portal/docs/operational/TEAM-AI-WORKFLOW.md](../portal/docs/operational/TEAM-AI-WORKFLOW.md)
 

@@ -73,7 +73,7 @@ Alias ngắn — skill giữ tên đầy đủ: [common integration spec](../fea
 Chi tiết sync: `.cursor/extracts/api-spec-sync.md`  
 Chi tiết integration: `.cursor/extracts/api-integration-spec.md`  
 Chi tiết hashtag: `.cursor/extracts/api-codegen-tags.md`, `api-codegen-readiness.md`  
-Scripts: `scripts/docs/` · `scripts/api-gen/` · `pnpm docs:render` · `pnpm api:gen` / `pnpm api:gen:dry`
+Scripts: `scripts/docs/` · `codegen/runners/` · `pnpm docs:render` · `pnpm api:gen` / `pnpm api:gen:dry`
 
 ## Commands
 
@@ -83,7 +83,7 @@ Scripts: `scripts/docs/` · `scripts/api-gen/` · `pnpm docs:render` · `pnpm ap
 | `/api-update-spec` | `.cursor/skills/api-update-spec/` | Sync portal delta / merge child specs / `be-only` updates in-place |
 | `/grill-api-spec` | `.cursor/skills/grill-api-spec/` | Audit + codegen-ready + `api:gen:dry` gate |
 | `/api-code` | `.cursor/skills/api-code/` | `pnpm api:gen` + HANDOFF manual items |
-| `api:gen` | `scripts/api-gen/` | Execute `m:*` from spec (called by `/api-code`) |
+| `api:gen` | `codegen/runners/` | Execute `m:*` from spec (called by `/api-code`) |
 | `/api` | `.cursor/skills/api/` | Router — spec vs grill vs code |
 
 **Integration (không Portal FE, không diagram Portal):**

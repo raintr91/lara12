@@ -1,6 +1,6 @@
 # API unit test tags
 
-> Registry: `shared/api-unit-test.registry.json` · validate: `pnpm api:unit-registry`  
+> Registry: `registries/unit-test.registry.json` · validate: `pnpm api:unit-registry`  
 > Manifest: `docs/features/{slug}/generated/unit.manifest.json`  
 > Diagram: [`docs/operational/UNIT-PHASE-DIAGRAM.md`](../../docs/operational/UNIT-PHASE-DIAGRAM.md) — unit lane + `#needs-unit-test` lifecycle  
 > App concerns: `src/tests/Unit/Concerns/` (commonBaselines — never per-feature gen)

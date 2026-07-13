@@ -8,7 +8,7 @@
   "module": "Chain",
   "entity": "Hotel",
   "pathModel": "Platform",
-  "registry": "shared/api-codegen.registry.json",
+  "registry": "registries/codegen.registry.json",
   "wire": {
     "search": true,
     "detail": false,

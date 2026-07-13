@@ -7,7 +7,7 @@
   "entity": "Hotel",
   "feature": "chain-hotel",
   "codegenManifest": "generated/codegen.manifest.json",
-  "unitRegistry": "shared/api-unit-test.registry.json",
+  "unitRegistry": "registries/unit-test.registry.json",
   "commands": [],
   "files": [
     {

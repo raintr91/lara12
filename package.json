@@ -14,12 +14,12 @@
     "openapi:preview": "redocly preview-docs docs/openapi/api.yaml --host 0.0.0.0 --port 8081",
     "swagger:build": "node scripts/docs/build-swagger-ui.mjs",
     "swagger:dev": "pnpm openapi:bundle && pnpm swagger:build && pnpm docs:dev",
-    "api:gen": "node scripts/api-gen/generate.mjs",
-    "api:gen:dry": "node scripts/api-gen/generate.mjs --dry-run",
-    "api:registry": "node scripts/api-gen/validate-registry.mjs",
-    "api:unit-gen": "node scripts/api-unit-gen/generate.mjs",
-    "api:unit-gen:dry": "node scripts/api-unit-gen/generate.mjs --dry-run",
-    "api:unit-registry": "node scripts/api-unit-gen/validate-registry.mjs"
+    "api:gen": "node codegen/runners/generate.mjs",
+    "api:gen:dry": "node codegen/runners/generate.mjs --dry-run",
+    "api:registry": "node codegen/runners/validate-registry.mjs",
+    "api:unit-gen": "node unitgen/runners/generate.mjs",
+    "api:unit-gen:dry": "node unitgen/runners/generate.mjs --dry-run",
+    "api:unit-registry": "node unitgen/runners/validate-registry.mjs"
   },
   "devDependencies": {
     "handlebars": "^4.7.9",

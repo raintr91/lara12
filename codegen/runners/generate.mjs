@@ -52,7 +52,7 @@ function shouldRunUnitGen(spec, registry) {
 
 /** @param {string} specFile @param {{ force?: boolean }} options */
 function runUnitGen(specFile, options) {
-  const args = ['scripts/api-unit-gen/generate.mjs', '--spec', specFile]
+  const args = ['unitgen/runners/generate.mjs', '--spec', specFile]
   if (options.force) {
     args.push('--force')
   }

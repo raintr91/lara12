@@ -3,7 +3,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const repoRoot = path.join(path.dirname(fileURLToPath(import.meta.url)), '../../..')
-export const REGISTRY_REL = 'shared/api-codegen.registry.json'
+export const REGISTRY_REL = 'registries/codegen.registry.json'
 
 /** @type {Record<string, unknown> | null} */
 let cached = null

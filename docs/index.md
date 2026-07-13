@@ -68,4 +68,4 @@ Portal FE workflow: `../portal/docs/operational/TEAM-AI-WORKFLOW.md`
 | `pnpm api:gen:dry` | Codegen plan + gates |
 | `pnpm api:gen` | Execute artisan (sau approval) |
 
-Chi tiết: `scripts/docs/README.md` · `scripts/api-gen/README.md`
+Chi tiết: `scripts/docs/README.md` · `codegen/runners/README.md`

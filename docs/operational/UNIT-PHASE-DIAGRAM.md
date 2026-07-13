@@ -1,7 +1,7 @@
 # Unit phase — PHPUnit (API dev lane)
 
 > **Standalone** — không nằm [TEAM-AI-BACKEND-WORKFLOW](./TEAM-AI-BACKEND-WORKFLOW.md) diagram chính (spec → codegen → Portal wire).  
-> Hub: `scripts/api-unit-gen/README.md` · Skills: `/unit` · `/grill-unit`
+> Hub: `unitgen/runners/README.md` · Skills: `/unit` · `/grill-unit`
 
 ---
 
@@ -44,7 +44,7 @@ flowchart TD
 
 ## `#needs-unit-test` — tag lifecycle
 
-Theo `scripts/api-unit-gen/` + `shared/api-unit-test.registry.json`.
+Theo `unitgen/runners/` + `registries/unit-test.registry.json`.
 
 ```mermaid
 flowchart TD
@@ -125,7 +125,7 @@ cd src && php artisan test --coverage --testsuite=ModuleChain
 | Doc | Mục đích |
 |-----|----------|
 | [TEAM-AI-BACKEND-WORKFLOW](./TEAM-AI-BACKEND-WORKFLOW.md) | Spec → codegen → wire (không unit) |
-| `scripts/api-unit-gen/README.md` | Dedupe stub, `--force`, phases |
+| `unitgen/runners/README.md` | Dedupe stub, `--force`, phases |
 | `.cursor/extracts/api-unit-test-tags.md` | Hashtag reference |
 | `.cursor/skills/unit/SKILL.md` | `/unit` |
 | `.cursor/skills/grill-unit/SKILL.md` | `/grill-unit` |
