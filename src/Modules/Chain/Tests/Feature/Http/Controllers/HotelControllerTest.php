@@ -1,0 +1,209 @@
+<?php
+
+namespace Modules\Chain\Tests\Feature\Http\Controllers;
+
+use App\Http\Actions\BaseAction;
+use App\Http\Queries\BaseQuery;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use ReflectionClass;
+use ReflectionMethod;
+use Modules\Chain\Http\Controllers\HotelController;
+use Tests\TestCase;
+
+class HotelControllerTest extends TestCase
+{
+    public function test_target_file_exists(): void
+    {
+        $this->assertFileExists(base_path('Modules/Chain/Http/Controllers/HotelController.php'));
+    }
+
+    public function test_target_class_declaration_matches_expected_fqcn(): void
+    {
+        $path = base_path('Modules/Chain/Http/Controllers/HotelController.php');
+        $contents = file_get_contents($path);
+
+        $this->assertNotFalse($contents, "Unable to read [{$path}].");
+
+        preg_match('/^namespace\s+([^;]+);/m', $contents, $namespaceMatches);
+        preg_match('/^\s*(?:abstract\s+|final\s+)?(?:class|interface|trait|enum)\s+([A-Za-z_][A-Za-z0-9_]*)/m', $contents, $classMatches);
+
+        $this->assertArrayHasKey(1, $namespaceMatches, "No namespace declaration found in [{$path}].");
+        $this->assertArrayHasKey(1, $classMatches, "No class-like declaration found in [{$path}].");
+
+        $declaredFqcn = trim($namespaceMatches[1]).'\\'.trim($classMatches[1]);
+        $this->assertSame('Modules\Chain\Http\Controllers\HotelController', $declaredFqcn);
+    }
+
+    public function test_controller_class_exists_and_is_loadable(): void
+    {
+        $this->assertTrue(class_exists(\Modules\Chain\Http\Controllers\HotelController::class));
+    }
+
+    public function test_controller_extends_module_base_controller(): void
+    {
+        $this->assertTrue(is_subclass_of(\Modules\Chain\Http\Controllers\HotelController::class, \App\Http\Controllers\BaseController::class));
+    }
+
+    public function test_controller_declares_public_action_methods(): void
+    {
+        $reflection = new ReflectionClass(\Modules\Chain\Http\Controllers\HotelController::class);
+
+        if ($reflection->isAbstract()) {
+            $this->assertTrue($reflection->isAbstract());
+
+            return;
+        }
+
+        $methods = array_filter(
+            $reflection->getMethods(ReflectionMethod::IS_PUBLIC),
+            fn (ReflectionMethod $method): bool =>
+                $method->class === $reflection->getName()
+                && ! in_array($method->name, ['__construct', 'middleware'], true)
+                && ! $this->isTraitHelperMethod($method)
+        );
+
+        $this->assertNotEmpty(
+            $methods,
+            'Controller should expose at least one public action method declared in the target class.'
+        );
+    }
+
+    public function test_controller_is_resolvable_from_container(): void
+    {
+        $reflection = new ReflectionClass(\Modules\Chain\Http\Controllers\HotelController::class);
+
+        if ($reflection->isAbstract()) {
+            $this->assertTrue($reflection->isAbstract());
+
+            return;
+        }
+
+        $controller = $this->app->make(\Modules\Chain\Http\Controllers\HotelController::class);
+        $this->assertInstanceOf(\Modules\Chain\Http\Controllers\HotelController::class, $controller);
+    }
+
+    private function invokeControllerMethod(object $controller, ReflectionMethod $method): JsonResponse
+    {
+        if ($method->name === 'index' && count($method->getParameters()) > 0) {
+            $queryClass = $this->deriveSiblingClass('Query');
+            app()->bind($queryClass, fn () => $this->makeQueryDouble($queryClass));
+        }
+
+        $args = [];
+
+        foreach ($method->getParameters() as $parameter) {
+            $args[] = $this->resolveArgument($parameter, $method->name);
+        }
+
+        return $method->invokeArgs($controller, $args);
+    }
+
+    private function resolveArgument(\ReflectionParameter $parameter, string $methodName): mixed
+    {
+        $type = $parameter->getType();
+
+        if (! $type instanceof \ReflectionNamedType || $type->isBuiltin()) {
+            if ($parameter->getName() === 'operation') {
+                return $parameter->isDefaultValueAvailable() ? $parameter->getDefaultValue() : $methodName;
+            }
+
+            return $parameter->getName() === 'arrId' ? [1, 2] : 123;
+        }
+
+        $className = $type->getName();
+
+        if (is_a($className, BaseAction::class, true)) {
+            return $this->makeActionDouble($className);
+        }
+
+        if (is_a($className, BaseQuery::class, true)) {
+            return $this->makeQueryDouble($className);
+        }
+
+        if (is_a($className, FormRequest::class, true)) {
+            return $this->makeFormRequestDouble($className, ['name' => 'demo']);
+        }
+
+        if ($className === Request::class) {
+            return Request::create('/admin-test', 'POST', ['arrId' => [1, 2]]);
+        }
+
+        return $parameter->isDefaultValueAvailable() ? $parameter->getDefaultValue() : null;
+    }
+
+    private function makeFormRequestDouble(string $className, array $payload): FormRequest
+    {
+        $fqcn = '\\' . ltrim($className, '\\');
+
+        /** @var FormRequest $request */
+        $request = eval(sprintf(
+            'return new class(%s) extends %s { public function __construct(private array $payload) { parent::__construct([], $this->payload, [], [], [], ["REQUEST_METHOD" => "POST"]); } public function validated($key = null, $default = null): array { return $this->payload; } public function authorize(): bool { return true; } public function rules(): array { return []; } };',
+            var_export($payload, true),
+            $fqcn
+        ));
+
+        $request->initialize([], $payload, [], [], [], ['REQUEST_METHOD' => 'POST']);
+
+        return $request;
+    }
+
+    private function makeActionDouble(string $className): BaseAction
+    {
+        $fqcn = '\\' . ltrim($className, '\\');
+
+        return eval(sprintf(
+            'return new class extends %s { public array $received = []; protected function run(...$args): mixed { $this->received = $args; return ["handled" => true, "args" => $args]; } };',
+            $fqcn
+        ));
+    }
+
+    private function makeQueryDouble(string $className): BaseQuery
+    {
+        $fqcn = '\\' . ltrim($className, '\\');
+
+        return eval(sprintf(
+            'return new class extends %s { public function __construct() {} public function paginate(): \\Illuminate\\Contracts\\Pagination\\LengthAwarePaginator { return new \\Illuminate\\Pagination\\LengthAwarePaginator([["id" => 1]], 1, 15, 1, ["path" => "/admin-test"]); } public function findById($id) { return ["id" => $id]; } };',
+            $fqcn
+        ));
+    }
+
+    private function deriveSiblingClass(string $suffix): string
+    {
+        $directory = $suffix === 'Query' ? 'Queries' : $suffix . 's';
+        $className = str_replace('\\Http\\Controllers\\', '\\Http\\' . $directory . '\\', \Modules\Chain\Http\Controllers\HotelController::class);
+
+        return preg_replace('/Controller$/', $suffix, $className) ?? $className;
+    }
+
+    private function isTraitHelperMethod(ReflectionMethod $method): bool
+    {
+        $parameters = $method->getParameters();
+        $firstType = $this->parameterTypeName($parameters[0] ?? null);
+        $secondType = $this->parameterTypeName($parameters[1] ?? null);
+
+        return match ($method->name) {
+            'search' => $firstType === \App\Http\Queries\BaseQuery::class,
+            'getDetail' => $firstType === \App\Http\Queries\BaseQuery::class,
+            'create' => $firstType === \App\Http\Actions\BaseAction::class && $secondType === \Illuminate\Http\Request::class,
+            'update' => $firstType === \App\Http\Actions\BaseAction::class && $secondType === \Illuminate\Http\Request::class,
+            'delete' => $firstType === \App\Http\Actions\BaseAction::class,
+            default => false,
+        };
+    }
+
+    private function parameterTypeName(?\ReflectionParameter $parameter): ?string
+    {
+        if (! $parameter) {
+            return null;
+        }
+
+        $type = $parameter->getType();
+
+        return $type instanceof \ReflectionNamedType && ! $type->isBuiltin()
+            ? $type->getName()
+            : null;
+    }
+}

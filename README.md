@@ -1,8 +1,22 @@
 # API (Laravel)
 
-Backend Laravel modular — contract từ Portal spec/testcases, OpenAPI YAML, harness AI riêng.
+Backend Laravel modular — contract YAML, OpenAPI, codegen, harness AI.
 
-## Quick start
+```text
+api/
+├── docs/              # VitePress site + feature specs + OpenAPI
+├── package.json       # Docs tooling (VitePress, Redocly, Swagger, api-gen)
+├── scripts/
+│   ├── api-gen/       # pnpm api:gen — Laravel codegen from spec
+│   └── docs/          # render-backend-spec, render-openapi, swagger
+├── src/               # Laravel (composer, artisan, Modules/)
+├── shared/            # api-codegen.registry.json
+├── platform-ai/       # SSOT skills, rules, extracts (mirror → .cursor)
+├── .cursor/           # Mirrored by ./scripts/platform-ai-link (gitignored)
+└── .harness/          # Session handoff
+```
+
+## Quick start (Laravel)
 
 ```bash
 cd src
@@ -11,29 +25,62 @@ cp .env.example .env
 php artisan key:generate
 ```
 
-Local Docker: [docker/README.md](docker/README.md) — gateway + `base_shared_net` trước.
+Docker: [docker/README.md](docker/README.md)
 
-## Documentation
-
-- [Docs hub](src/docs/index.md)
-- [Team AI backend workflow](src/docs/TEAM-AI-BACKEND-WORKFLOW.md) — `/api-spec` → `/grill-api-spec` → `/api-code`
-- [Backend API spec guide](src/docs/BACKEND_API_SPEC_GUIDE.md)
-- [OpenAPI + Swagger](src/docs/OPENAPI-YAML-SWAGGER.md)
-
-Portal FE workflow: `../portal/docs/operational/TEAM-AI-WORKFLOW.md`
-
-## OpenAPI / docs site
+## Documentation site
 
 ```bash
-cd src
-pnpm openapi:lint
-pnpm docs:dev
+pnpm install
+./scripts/platform-ai-link   # mirror platform-ai/ → .cursor (sau clone)
+pnpm docs:render
+pnpm docs:dev          # → http://localhost:5173
+pnpm docs:build
+pnpm docs:preview
 ```
 
-## Team AI harness
+| Trang | Path |
+|-------|------|
+| **Docs hub** | [docs/index.md](docs/index.md) — workflow diagram (ASCII) |
+| **Team workflow** | [docs/operational/TEAM-AI-BACKEND-WORKFLOW.md](docs/operational/TEAM-AI-BACKEND-WORKFLOW.md) |
+| **Spec guide** | [docs/operational/BACKEND_API_SPEC_GUIDE.md](docs/operational/BACKEND_API_SPEC_GUIDE.md) |
+| **Integration / webhook** | [docs/operational/INTEGRATION-API-SPEC.md](docs/operational/INTEGRATION-API-SPEC.md) |
+| **OpenAPI** | [docs/openapi/index.md](docs/openapi/index.md) |
+| **API Base** | [docs/api-base/index.md](docs/api-base/index.md) |
+| **Feature contracts** | [docs/api-base/generated.md](docs/api-base/generated.md) |
 
-Shared snippets: `.cursor/extracts/`. Gỡ vendor cũ:
+Scripts: [scripts/docs/README.md](scripts/docs/README.md) · Codegen: [scripts/api-gen/README.md](scripts/api-gen/README.md)
+
+Portal FE: [../portal/docs/operational/TEAM-AI-WORKFLOW.md](../portal/docs/operational/TEAM-AI-WORKFLOW.md)
+
+## Team AI commands
+
+**Portal-backed (có FE spec):**
+
+```text
+/api-spec → /grill-api-spec → /api-code
+```
+
+**Integration (webhook / partner — không Portal FE):**
+
+```text
+/api-int-spec → /grill-int-spec → /api-code
+```
+
+(`/api-integration-spec` · `/grill-integration-spec` — tên đầy đủ; xem [common integration spec](docs/features/common/generated/common-integration-spec.md))
+
+Router: `.cursor/skills/api/SKILL.md` · Skills: `.cursor/skills/`
+
+## OpenAPI & codegen
 
 ```bash
-bash scripts/remove-ai-harness-vendor.sh
+pnpm openapi:render    # merge → docs/openapi/api.yaml
+pnpm openapi:lint
+pnpm api:gen:dry --spec docs/features/{slug}/01-backend-spec.yaml
+pnpm api:gen --spec docs/features/{slug}/01-backend-spec.yaml --write-spec
+```
+
+Laravel Vite (assets trong `src/`):
+
+```bash
+cd src && pnpm install && pnpm dev
 ```

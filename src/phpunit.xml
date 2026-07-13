@@ -12,6 +12,9 @@
             <exclude>tests/Unit/Console/Commands</exclude>
             <exclude>tests/Unit/Models/BaseModelTest.php</exclude>
         </testsuite>
+        <testsuite name="ModuleChain">
+            <directory suffix="Test.php">Modules/Chain/Tests</directory>
+        </testsuite>
     </testsuites>
     <source>
         <include>
@@ -21,6 +24,8 @@
         <exclude>
             <directory suffix=".php">app/Console/Commands</directory>
             <directory suffix="Test.php">Modules</directory>
+            <directory suffix=".php">Modules/Chain/Resources/Lang</directory>
+            <directory suffix=".php">Modules/Chain/Resources/Views</directory>
         </exclude>
     </source>
     <coverage includeUncoveredFiles="true">

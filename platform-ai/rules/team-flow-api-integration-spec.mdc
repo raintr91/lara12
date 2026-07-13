@@ -1,0 +1,23 @@
+---
+description: /api-integration-spec — partner & webhook contract (no Portal FE)
+globs: "docs/features/integrations/**/*,docs/features/partner/**/*,docs/features/webhooks/**/*,docs/integrations/**/*"
+alwaysApply: false
+---
+
+# Team Flow — API Integration Spec
+
+**Không** Portal FE base · **không** testcase YAML · **không** nằm diagram Portal.
+
+| Command | Skill |
+|---------|-------|
+| `/api-integration-spec` | `.cursor/skills/api-integration-spec/SKILL.md` |
+| `/grill-integration-spec` | `.cursor/skills/grill-integration-spec/SKILL.md` |
+
+Extract: `.cursor/extracts/api-integration-spec.md`
+
+- Input: provider doc, partner contract, legacy code — `feature.source.integrationRefs`
+- `feature.source.base: none` · `portalRefs: []`
+- Output: `01-backend-spec.yaml`, `02-openapi.yaml`, `03-mock-data.yaml`
+- Sau grill: `/api-code` (cùng codegen pipeline)
+
+Nếu có Portal UI spec → dùng `team-flow-api-spec.mdc` (`/api-spec`), không dùng flow này.

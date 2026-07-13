@@ -1,0 +1,25 @@
+{
+  "defaultProject": "mairy-backend",
+  "projects": {
+    "mairy-backend": {
+      "root": "/home/vutv/workspace/mairy-backend",
+      "description": "Legacy Laravel backend for the Mairy/SaaS domain"
+    },
+    "mairy-fullsco": {
+      "root": "/home/vutv/workspace/mairy-fullsco",
+      "description": "Legacy admin/fullSCO UI used as reference for SaaS admin portal"
+    },
+    "mairy-frontend": {
+      "root": "/home/vutv/workspace/mairy-frontend",
+      "description": "Legacy Nuxt frontend used as reference for SaaS chain/store portals"
+    },
+    "mairy-scenario": {
+      "root": "/home/vutv/workspace/mairy-scenario",
+      "description": "Legacy scenario/supporting frontend project for Mairy flows"
+    },
+    "mairy-crawl": {
+      "root": "/home/vutv/workspace/mairy-crawl",
+      "description": "Legacy crawler/supporting project for Mairy integrations"
+    }
+  }
+}

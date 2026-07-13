@@ -1,0 +1,102 @@
+feature: chain-hotel
+mocks:
+  chain-hotel.search.success:
+    endpoint: chain-hotel.search
+    status: 200
+    request:
+      query:
+        page: 1
+        per_page: 100
+    response:
+      success: true
+      code: 200
+      message: Retrieved successfully
+      data:
+        - id: 1
+          name: Chain — danh sách hotel (施設一覧) A
+          managers:
+            - id: 101
+              full_name: Manager A
+        - id: 2
+          name: Chain — danh sách hotel (施設一覧) B
+          managers:
+            - id: 102
+              full_name: Manager B
+        - id: 3
+          name: Chain — danh sách hotel (施設一覧) C
+          managers:
+            - id: 103
+              full_name: Manager C
+      meta:
+        pagination:
+          current_page: 1
+          per_page: 100
+          last_page: 2
+          total: 6
+
+  chain-hotel.search.page2:
+    endpoint: chain-hotel.search
+    status: 200
+    request:
+      query:
+        page: 2
+        per_page: 100
+    response:
+      success: true
+      code: 200
+      message: Retrieved successfully
+      data:
+        - id: 101
+          name: Chain — danh sách hotel (施設一覧) A (page 2)
+          managers:
+            - id: 101
+              full_name: Manager A
+        - id: 102
+          name: Chain — danh sách hotel (施設一覧) B (page 2)
+          managers:
+            - id: 102
+              full_name: Manager B
+        - id: 103
+          name: Chain — danh sách hotel (施設一覧) C (page 2)
+          managers:
+            - id: 103
+              full_name: Manager C
+      meta:
+        pagination:
+          current_page: 2
+          per_page: 100
+          last_page: 2
+          total: 6
+
+  chain-hotel.search.per-page-20:
+    endpoint: chain-hotel.search
+    status: 200
+    request:
+      query:
+        page: 1
+        per_page: 20
+    response:
+      success: true
+      code: 200
+      message: Retrieved successfully
+      data:
+        - id: 1
+          name: Chain — danh sách hotel (施設一覧) A
+          managers:
+            - id: 101
+              full_name: Manager A
+      meta:
+        pagination:
+          current_page: 1
+          per_page: 20
+          last_page: 1
+          total: 1
+
+  chain-hotel.search.unauthorized:
+    endpoint: chain-hotel.search
+    status: 401
+    response:
+      success: false
+      code: 401
+      error: Unauthenticated
+      message: Unauthenticated

@@ -3,11 +3,32 @@
 prod/.env
 stg/.env
 
+# Node (docs tooling at repo root)
+node_modules/
+
 # Local project mappings for AI workflow
 .cursor/legacy-projects.local.json
 .cursor/team-projects.local.json
 
-# Local AI vendor skills/rules (installed per member, do not commit)
-.cursor/skills/vendor/
-.cursor/rules-vendor/
-.cursor/skills-vendor/
+# Per-feature harness state (examples committed in .harness/*.example.*)
+.harness/progress.md
+.harness/feature_list.json
+
+# Docs site build artifacts (source lives in docs/)
+docs/.vitepress/dist
+docs/.vitepress/.temp
+docs/public/openapi/openapi.yaml
+docs/public/swagger
+
+# platform-ai-link mirror (SSOT: platform-ai/ — edit there, then run ./scripts/platform-ai-link)
+.cursor/skills/
+.cursor/rules/
+.cursor/extracts/
+.kilo/skills/
+.kilo/instructions/
+.kilo/extracts/
+.kilo/command/
+
+
+platform-repos.local.json
+legacy-repos.local.json

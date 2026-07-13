@@ -1,0 +1,17 @@
+---
+description: /api-code — Laravel implementation from approved backend spec
+globs: src/Modules/**/*
+alwaysApply: false
+---
+
+# Team Flow — API Code
+
+Active command: `/api-code` — `.cursor/skills/api-code/SKILL.md`
+
+After `/api-spec` (+ `/grill-api-spec` when needed). Requires `approval.status: approved`.
+
+Extracts: `codegen.md`, `api-codegen-tags.md`, `http-layer.md`, `entity-relationship.md`, `media-s3.md`, `agent-discipline.md`, `verify-gate.md`
+
+- Gate: `pnpm api:gen:dry` passed in grill
+- Run: `pnpm api:gen --spec docs/features/{slug}/01-backend-spec.yaml --write-spec`
+- Agent: HANDOFF `#manual-*` only after script

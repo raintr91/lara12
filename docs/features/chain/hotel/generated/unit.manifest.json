@@ -1,0 +1,87 @@
+{
+  "generatedAt": "2026-06-29T11:48:58.596Z",
+  "specFile": "docs/features/chain/hotel/01-backend-spec.yaml",
+  "phase": "behavioral",
+  "profile": "crud-standard",
+  "module": "Chain",
+  "entity": "Hotel",
+  "feature": "chain-hotel",
+  "codegenManifest": "generated/codegen.manifest.json",
+  "unitRegistry": "shared/api-unit-test.registry.json",
+  "commands": [],
+  "files": [
+    {
+      "layer": "request",
+      "path": "src/Modules/Chain/Tests/Unit/Http/Requests/HotelSearchRequestRulesKeysBehaviorTest.php",
+      "pattern": "request.rulesKeys",
+      "reqIds": [
+        "REQ-CHAIN-HOTEL-LIST-001",
+        "REQ-CHAIN-HOTEL-LIST-002",
+        "REQ-CHAIN-HOTEL-LIST-003"
+      ]
+    },
+    {
+      "layer": "request",
+      "path": "src/Modules/Chain/Tests/Unit/Http/Requests/HotelSearchRequestDefaultPerPageBehaviorTest.php",
+      "pattern": "request.defaultPerPage",
+      "reqIds": [
+        "REQ-CHAIN-HOTEL-LIST-001",
+        "REQ-CHAIN-HOTEL-LIST-002",
+        "REQ-CHAIN-HOTEL-LIST-003"
+      ]
+    },
+    {
+      "layer": "query",
+      "path": "src/Modules/Chain/Tests/Unit/Http/Queries/HotelQueryChainScopeBehaviorTest.php",
+      "pattern": "query.chainScope",
+      "reqIds": [
+        "REQ-CHAIN-HOTEL-LIST-001",
+        "REQ-CHAIN-HOTEL-LIST-002",
+        "REQ-CHAIN-HOTEL-LIST-003"
+      ]
+    },
+    {
+      "layer": "action",
+      "path": "src/Modules/Chain/Tests/Unit/Http/Actions/HotelActionRelationshipsBehaviorTest.php",
+      "pattern": "action.relationshipSync",
+      "reqIds": [
+        "REQ-CHAIN-HOTEL-LIST-001",
+        "REQ-CHAIN-HOTEL-LIST-002",
+        "REQ-CHAIN-HOTEL-LIST-003"
+      ]
+    },
+    {
+      "layer": "resource",
+      "path": "src/Modules/Chain/Tests/Unit/Http/Resources/HotelResourceOpenApiShapeBehaviorTest.php",
+      "pattern": "resource.openapiShape",
+      "reqIds": [
+        "REQ-CHAIN-HOTEL-LIST-001",
+        "REQ-CHAIN-HOTEL-LIST-002",
+        "REQ-CHAIN-HOTEL-LIST-003"
+      ]
+    },
+    {
+      "layer": "resource",
+      "path": "src/Modules/Chain/Tests/Unit/Http/Resources/HotelResourceNestedRelationsBehaviorTest.php",
+      "pattern": "resource.nestedRelations",
+      "reqIds": [
+        "REQ-CHAIN-HOTEL-LIST-001",
+        "REQ-CHAIN-HOTEL-LIST-002",
+        "REQ-CHAIN-HOTEL-LIST-003"
+      ]
+    }
+  ],
+  "written": [
+    "src/Modules/Chain/Tests/Unit/Http/Requests/HotelSearchRequestRulesKeysBehaviorTest.php",
+    "src/Modules/Chain/Tests/Unit/Http/Requests/HotelSearchRequestDefaultPerPageBehaviorTest.php",
+    "src/Modules/Chain/Tests/Unit/Http/Queries/HotelQueryChainScopeBehaviorTest.php",
+    "src/Modules/Chain/Tests/Unit/Http/Actions/HotelActionRelationshipsBehaviorTest.php",
+    "src/Modules/Chain/Tests/Unit/Http/Resources/HotelResourceOpenApiShapeBehaviorTest.php",
+    "src/Modules/Chain/Tests/Unit/Http/Resources/HotelResourceNestedRelationsBehaviorTest.php"
+  ],
+  "skipped": [],
+  "skippedPatterns": [],
+  "needsUnit": [],
+  "mocks": [],
+  "execution": []
+}

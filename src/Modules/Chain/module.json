@@ -1,0 +1,11 @@
+{
+    "name": "Chain",
+    "alias": "chain",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Chain\\Providers\\ChainServiceProvider"
+    ],
+    "files": []
+}

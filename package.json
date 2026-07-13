@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json.schemastore.org/package.json",
+  "name": "api-docs",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "docs:render": "node scripts/docs/render-backend-spec.mjs",
+    "docs:dev": "pnpm docs:render && vitepress dev docs --host 0.0.0.0",
+    "docs:build": "pnpm docs:render && pnpm openapi:bundle && pnpm swagger:build && vitepress build docs",
+    "docs:preview": "vitepress preview docs --host 0.0.0.0",
+    "openapi:render": "node scripts/docs/render-openapi.mjs",
+    "openapi:lint": "pnpm openapi:render",
+    "openapi:bundle": "pnpm openapi:render && redocly bundle docs/openapi/api.yaml -o docs/public/openapi/openapi.yaml",
+    "openapi:preview": "redocly preview-docs docs/openapi/api.yaml --host 0.0.0.0 --port 8081",
+    "swagger:build": "node scripts/docs/build-swagger-ui.mjs",
+    "swagger:dev": "pnpm openapi:bundle && pnpm swagger:build && pnpm docs:dev",
+    "api:gen": "node scripts/api-gen/generate.mjs",
+    "api:gen:dry": "node scripts/api-gen/generate.mjs --dry-run",
+    "api:registry": "node scripts/api-gen/validate-registry.mjs",
+    "api:unit-gen": "node scripts/api-unit-gen/generate.mjs",
+    "api:unit-gen:dry": "node scripts/api-unit-gen/generate.mjs --dry-run",
+    "api:unit-registry": "node scripts/api-unit-gen/validate-registry.mjs"
+  },
+  "devDependencies": {
+    "handlebars": "^4.7.9",
+    "@braintree/sanitize-url": "^7.1.2",
+    "@redocly/cli": "^2.34.0",
+    "dayjs": "^1.11.21",
+    "debug": "^4.4.0",
+    "mermaid": "^11.16.0",
+    "swagger-ui-dist": "^5.32.6",
+    "vitepress": "^1.6.4",
+    "vitepress-plugin-mermaid": "^2.0.17",
+    "yaml": "^2.9.0"
+  }
+}

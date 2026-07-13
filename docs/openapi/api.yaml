@@ -1,0 +1,207 @@
+openapi: 3.1.0
+info:
+  title: API Base
+  version: 0.1.0
+  license:
+    name: Proprietary
+    identifier: LicenseRef-Proprietary
+  description: >-
+    Base OpenAPI fragment (health). Feature paths are merged by `pnpm
+    openapi:render` from docs/features/**/02-openapi.yaml.
+
+    Feature fragments merged by `pnpm openapi:render`:
+
+    - docs/features/chain/hotel/02-openapi.yaml
+servers:
+  - url: http://api.base.local
+    description: Local API server
+tags:
+  - name: Health
+    description: Local documentation smoke endpoint.
+  - name: ChainHotels
+    description: Chain portal hotel list endpoints.
+paths:
+  /health:
+    get:
+      operationId: healthCheck
+      summary: Health check placeholder
+      tags:
+        - Health
+      security: []
+      responses:
+        "200":
+          description: API is reachable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+              example:
+                status: ok
+        "404":
+          description: Endpoint not found
+        "500":
+          description: Unexpected server error
+  /hotels:
+    get:
+      operationId: chainHotelSearch
+      summary: List hotels for authenticated chain
+      description: >
+        Returns hotels where chain_id matches the authenticated chain session.
+
+        Default sort created_at desc, tie-break id desc. No search filters on
+        contract.
+      tags:
+        - ChainHotels
+      security:
+        - chainAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - in: query
+          name: per_page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 100
+            enum:
+              - 20
+              - 40
+              - 80
+              - 100
+        - in: query
+          name: order_by
+          schema:
+            type: string
+            enum:
+              - created_at
+              - id
+            default: created_at
+        - in: query
+          name: sorted_by
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+            default: desc
+      responses:
+        "200":
+          description: Paginated hotel list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChainHotelListResponse"
+        "401":
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          example: ok
+    ChainHotelManager:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: integer
+          example: 101
+        full_name:
+          type:
+            - string
+            - "null"
+          example: Manager A
+    ChainHotel:
+      type: object
+      required:
+        - id
+        - managers
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type:
+            - string
+            - "null"
+          example: Hotel Sakura
+        managers:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChainHotelManager"
+    PaginationMeta:
+      type: object
+      properties:
+        current_page:
+          type: integer
+          example: 1
+        per_page:
+          type: integer
+          example: 100
+        last_page:
+          type: integer
+          example: 2
+        total:
+          type: integer
+          example: 150
+    ChainHotelListResponse:
+      type: object
+      required:
+        - success
+        - data
+      properties:
+        success:
+          type: boolean
+          example: true
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: Retrieved successfully
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChainHotel"
+        meta:
+          type: object
+          properties:
+            pagination:
+              $ref: "#/components/schemas/PaginationMeta"
+    ApiError:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        code:
+          type: integer
+        error:
+          type: string
+        message:
+          type: string
+  securitySchemes:
+    chainAuth:
+      type: http
+      scheme: bearer
+      description: Chain portal session / token

@@ -1,0 +1,13 @@
+---
+description: Harness state files — progress handoff between backend sessions
+globs: .harness/**/*
+alwaysApply: false
+---
+
+# Harness State (API)
+
+- `feature_list.json` — scope per feature; do not mark done without verify evidence
+- `progress.md` — handoff for the next session
+- When a public command advances phase, record: command, files changed, verify run/not run, remaining blockers
+
+Examples: `.harness/progress.example.md`, `.harness/feature_list.example.json`

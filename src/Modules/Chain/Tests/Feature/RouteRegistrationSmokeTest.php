@@ -1,0 +1,23 @@
+<?php
+
+namespace Modules\Chain\Tests\Feature;
+
+use Illuminate\Support\Facades\Route;
+use Tests\TestCase;
+
+class RouteRegistrationSmokeTest extends TestCase
+{
+    public function test_module_api_prefix_routes_are_registered(): void
+    {
+        $uris = collect(Route::getRoutes()->getRoutes())
+            ->map(fn ($route) => (string) $route->uri())
+            ->all();
+
+        $prefix = 'api/chain';
+        $hasModuleRoute = collect($uris)->contains(
+            static fn (string $uri): bool => $uri === $prefix || str_starts_with($uri, $prefix.'/')
+        );
+
+        $this->assertTrue($hasModuleRoute, "No route registered for module prefix [{$prefix}].");
+    }
+}
