@@ -2,8 +2,8 @@
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { readSpecFile } from '../api-gen/lib/read-spec.mjs'
-import { runArtisan } from '../api-gen/lib/exec-artisan.mjs'
+import { readSpecFile } from '../../codegen/runners/lib/read-spec.mjs'
+import { runArtisan } from '../../codegen/runners/lib/exec-artisan.mjs'
 import { buildUnitContext, buildUnitPlan } from './lib/plan.mjs'
 import { readCodegenManifest } from './lib/read-codegen.mjs'
 import { loadUnitTestRegistry, REGISTRY_REL } from './lib/unit-registry.mjs'
