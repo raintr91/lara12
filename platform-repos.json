@@ -1,0 +1,103 @@
+{
+  "defaultGroup": "platform-bases",
+  "groups": {
+    "platform-bases": {
+      "description": "Workspace base templates — FE / BE / fullstack / MCP tooling",
+      "primary": "api",
+      "projects": [
+        "portal",
+        "nextjs",
+        "nuxt-nest",
+        "next-nest",
+        "fast-api-base",
+        "api",
+        "integration",
+        "line",
+        "artifactgraph"
+      ]
+    }
+  },
+  "projects": {
+    "portal": {
+      "root": "../portal",
+      "role": "frontend",
+      "stack": "nuxt4",
+      "repo": "portal",
+      "skill": "platform-base",
+      "description": "Base Nuxt 4 (FE)",
+      "write": true
+    },
+    "nextjs": {
+      "root": "../nextjs",
+      "role": "frontend",
+      "stack": "nextjs",
+      "repo": "nextjs",
+      "skill": "platform-base",
+      "description": "Base Next.js (FE)",
+      "write": true
+    },
+    "nuxt-nest": {
+      "root": "../nuxt_nest",
+      "role": "fullstack",
+      "stack": "nuxt4-nest",
+      "repo": "nuxt_nest",
+      "skill": "platform-base",
+      "description": "Base Nuxt 4 + NestJS monorepo",
+      "write": true
+    },
+    "next-nest": {
+      "root": "../next_nest",
+      "role": "fullstack",
+      "stack": "nextjs-nest",
+      "repo": "next_nest",
+      "skill": "platform-base",
+      "description": "Base Next.js + NestJS monorepo",
+      "write": true
+    },
+    "fast-api-base": {
+      "root": "../fast-api-base",
+      "role": "backend",
+      "stack": "fastapi",
+      "repo": "fast-api-base",
+      "skill": "platform-base",
+      "description": "Base FastAPI (BE)",
+      "write": true
+    },
+    "api": {
+      "root": ".",
+      "role": "backend",
+      "stack": "laravel",
+      "repo": "api",
+      "skill": "api-base",
+      "description": "Base Laravel 12 (BE)",
+      "write": true
+    },
+    "integration": {
+      "root": "../integration",
+      "role": "backend",
+      "stack": "dotnet-integration",
+      "repo": "integration",
+      "skill": "platform-base",
+      "description": "Base .NET (BE)",
+      "write": true
+    },
+    "line": {
+      "root": "../line",
+      "role": "client",
+      "stack": "dotnet-line",
+      "repo": "line",
+      "skill": "platform-base",
+      "description": "Base WinForms — override in platform-repos.local.json for D:/workspace/line",
+      "write": true
+    },
+    "artifactgraph": {
+      "root": "../artifactgraph",
+      "role": "tooling",
+      "stack": "mcp",
+      "repo": "artifactgraph",
+      "skill": "platform-ai",
+      "description": "Local MCP artifactgraph — gaps/tags/gen allowlist (raintr91/artifactgraph)",
+      "write": true
+    }
+  }
+}
