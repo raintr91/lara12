@@ -1,0 +1,27 @@
+---
+description: ArtifactGraph MCP — DSL index + allowlisted gen; registries SSOT in product repo; opt-in skill use
+alwaysApply: false
+---
+# artifactgraph
+
+MCP: [raintr91/artifactgraph](https://github.com/raintr91/artifactgraph) · `/artifactgraph` · [ARTIFACTGRAPH](docs/operational/ARTIFACTGRAPH.md) · [INTERNALS](docs/operational/ARTIFACTGRAPH-INTERNALS.md)
+
+**SSOT:** product `registries/*.json` + templates — MCP **indexes** + `artifactgraph_gen` only. Promote after review stays in product skills/docs.
+
+**Token:** project `.cursor/mcp.json` (not Windows global). CLI for ad-hoc: `parity|gaps|status|gen`.
+
+## Prefer local MCP
+
+On artifact skills (`/spec`, `/legacy-spec`, grill, `/prototype`, `/unit`, `/test`, `/platform-mark`):
+
+1. **`analyze` / `grill_check` / `gaps` / `parity_check`** before dumping registries.
+2. **Grill + parity-drift** = local A/B/C. **context-orphan** = warn only.
+3. **Gen** via `artifactgraph_gen` keys from `artifactgraph.json` / `dsl.lanes` (`docsRender`, `specSplit`, `gen`, `unitGen`, `testcaseGen`, …).
+4. Cloud only **`cloudPromptSlice`** for missing Mo*/patterns — never full registries/templates; never write registry from cloud.
+5. After review OK → **promote in product repo** → `registryValidate*` → `rebuild` + `remember`.
+
+### If MCP / index missing
+
+Ask: *"Chưa wire. `artifactgraph init --location=local --target=cursor --yes` rồi `init-project` + `rebuild`?"*
+
+Hooks: `.cursor/extracts/artifactgraph-phase-hooks.md`

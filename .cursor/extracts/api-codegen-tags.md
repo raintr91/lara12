@@ -1,7 +1,7 @@
 # API Codegen Tags
 
 Source: `pnpm api:gen --spec docs/features/.../01-backend-spec.yaml`  
-Registry: `registries/codegen.registry.json` (mirror `portal/registries/design.registry.json`)  
+Registry: `shared/api-codegen.registry.json` (mirror `portal/shared/portal-design.registry.json`)  
 Manifest: `docs/features/{slug}/generated/codegen.manifest.json`  
 Templates: `docs/templates/backend-api.yaml`  
 Handoff: `docs/features/{slug}/generated/HANDOFF.md`

@@ -1,0 +1,13 @@
+---
+description: AI layer first; feature docs = pilot; app code only when user asks
+alwaysApply: true
+---
+
+# Platform AI
+
+- **SSOT:** `.cursor/` (`skills/`, `rules/`, `extracts/`). Optional Kilo: `./scripts/cursor-export-kilo`.
+- **Default:** `docs/operational/`, `scripts/spec|docs/`, extract validate.
+- **App** (`pages/`, `components/`, …): base done — edit only on explicit feature request.
+- **`docs/features/**`:** guinea pig — no backward-compat for old spec paths; delete blockers.
+- **Legacy repos:** read-once into trace; portal yaml is disposable.
+- **App work:** apply `platform-invariants.mdc` + glob rules. Detail: `/platform-ai` skill.

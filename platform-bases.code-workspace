@@ -1,0 +1,43 @@
+{
+  "folders": [
+    {
+      "name": "portal",
+      "path": "../portal"
+    },
+    {
+      "name": "nextjs",
+      "path": "../nextjs"
+    },
+    {
+      "name": "nuxt-nest",
+      "path": "../nuxt_nest"
+    },
+    {
+      "name": "next-nest",
+      "path": "../next_nest"
+    },
+    {
+      "name": "fast-api-base",
+      "path": "../fast-api-base"
+    },
+    {
+      "name": "api",
+      "path": "."
+    },
+    {
+      "name": "integration",
+      "path": "../integration"
+    },
+    {
+      "name": "line",
+      "path": "../line"
+    },
+    {
+      "name": "artifactgraph",
+      "path": "../artifactgraph"
+    }
+  ],
+  "settings": {
+    "files.exclude": {}
+  }
+}

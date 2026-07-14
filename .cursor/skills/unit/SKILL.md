@@ -18,7 +18,7 @@ Invoke trực tiếp: `/unit {slug}` hoặc `/unit {Module} {Entity}`.
 
 Shared extracts: `.cursor/extracts/unit-coverage.md`, `.cursor/extracts/api-unit-test-tags.md`, `agent-discipline.md`, `verify-gate.md`, `http-layer.md`, `entity-relationship.md`
 
-Reference: `unitgen/runners/README.md`, `docs/api-base/GENERATORS.md`, `src/make_help.md` (`m:module-test`)
+Reference: `scripts/api-unit-gen/README.md`, `docs/api-base/GENERATORS.md`, `src/make_help.md` (`m:module-test`)
 
 ## Input (manifest-first)
 

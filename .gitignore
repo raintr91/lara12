@@ -20,15 +20,11 @@ docs/.vitepress/.temp
 docs/public/openapi/openapi.yaml
 docs/public/swagger
 
-# platform-ai-link mirror (SSOT: platform-ai/ — edit there, then run ./scripts/platform-ai-link)
-.cursor/skills/
-.cursor/rules/
-.cursor/extracts/
+# Optional Kilo export (SSOT: .cursor/skills|rules|extracts — ./scripts/cursor-export-kilo)
 .kilo/skills/
 .kilo/instructions/
 .kilo/extracts/
 .kilo/command/
-
 
 platform-repos.local.json
 legacy-repos.local.json
