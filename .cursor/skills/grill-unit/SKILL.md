@@ -1,81 +1,49 @@
 ---
 name: grill-unit
-description: >-
-  /grill-unit command for auditing PHPUnit behavioral coverage after /unit.
-  Standalone API rule — not in team workflow diagram or portal testcase flow.
+extractBundle: grill-unit
+description: /grill-unit — refine Vitest unit tests.
 disable-model-invocation: true
 ---
 
-# /grill-unit — Unit Coverage Audit (standalone)
+# /grill-unit — Unit coverage audit (dev lane)
 
-After `/unit`. API-only — không testcase YAML, không team diagram.
+Diagram: `base-docs/platform/toolchain/UNIT-PHASE-DIAGRAM.md` (2 diagrams: unit lane + `#needs-unit-test` lifecycle)  
+After: `.cursor/skills/unit/SKILL.md` done (vitest scoped green, `needsUnit` clear)
 
-Diagram: `docs/operational/UNIT-PHASE-DIAGRAM.md` — grill **audit** coverage/reqIds; không loop săn 100%, không gọi `api:unit-gen` (quay `/unit` nếu thiếu file).
+**Extracts:** `extractBundle: grill-unit` → `.cursor/extracts/extract-registry.json`
 
-Shared extracts: `.cursor/extracts/unit-coverage.md`, `verify-gate.md`
+## Role
 
-Align with `.cursor/skills/unit/SKILL.md` Done criteria.
+**Coverage + reqIds + edge logic** — không tạo file smoke, không gọi `portal:unit-gen` (quay `/unit` nếu thiếu **file**).
 
-## Input
+## Input (token-thin)
 
-```text
-docs/features/{slug}/01-backend-spec.yaml
-docs/features/{slug}/02-openapi.yaml
-src/Modules/{Module}/Tests/
-src/tests/Unit/Models/
-Latest php artisan test / coverage output
-```
+1. `unit.manifest.json` — `files[]`, `reqIds`
+2. Kết quả `pnpm exec vitest run <entity paths> --coverage`
+3. Spec — `requirements` cho `reqIds` trong manifest only (logic acceptance, không UI)
+
+**Do not:** inventory repo, read pages/components, Playwright, re-run full `portal:unit-gen` unless báo user quay `/unit`.
 
 ## Checklist
 
-### Requirements traceability
+- [ ] Mỗi `codegen.manifest` logic file có test trong `manifest.files` hoặc `commonBaselines`
+- [ ] Mỗi `reqIds` có ≥1 `it()` assert behavior (không chỉ smoke pass)
+- [ ] Coverage V8 trên scope feature (models/validations/services/composables entity) — team target thường **100%**
+- [ ] Loại trừ hợp lý: `*.types.ts`, barrel `index.ts`, mocks (test qua composable/service)
+- [ ] Không test UI trong `tests/unit/`
+- [ ] Không fake pass (`skip`/`todo` che gap) trừ khi documented
 
-- [ ] Each `requirements.covered[]` id has ≥1 behavioral test (name or comment references REQ id)
-- [ ] Each `api.endpoints[]` action has controller/route coverage or documented Feature test
-- [ ] OpenAPI response fields asserted in Resource or Feature test
+## Output format
 
-### Layer matrix (`unit-coverage.md`)
+Bảng gap (nếu còn):
 
-- [ ] Request — rules + authorize (+ defaults if HANDOFF says so)
-- [ ] Query — scope/filters/sort/pagination per spec
-- [ ] Action — relationship sync if `#manual-action:relationships`
-- [ ] Resource — nested fields vs OpenAPI
-- [ ] Controller — wired endpoints match `codegen.wire`
-- [ ] Model — relationships if Platform/Tenant shared model
-- [ ] Service — if `#manual-service` or `#call-external`
+| Source file | Uncovered | Đề xuất 1 case | reqId |
+|-------------|-----------|----------------|-------|
 
-### Anti-patterns (fail grill)
+- **Pass:** coverage + reqIds OK → unit lane done; E2E (`/test`) là pipeline khác
+- **Fail file thiếu:** chuyển `/unit` (không tự gen hàng loạt ở grill)
 
-- Stub-only file (only `test_target_file_exists` / loadable / extends base)
-- Skipped tests without reason in HANDOFF or spec `openQuestions`
-- Testing private methods or framework internals
-- No fresh test run evidence in session
+## Rules
 
-### Coverage (when pcov available)
-
-```bash
-cd src && php artisan test --testsuite=Module{Module} --coverage-filter=Modules/{Module} --coverage-text
-```
-
-- [ ] Name uncovered classes/lines for Action, Query, Request, Resource under test
-- [ ] Target: 100% on **feature-scoped** classes (not whole monorepo)
-
-## Output
-
-```markdown
-## grill-unit — {slug}
-
-| Check | Status |
-|-------|--------|
-| REQ-… | pass / gap |
-
-### Gaps
-- {file} — {missing behavior}
-
-### Verdict
-ready | needs /unit pass
-```
-
-## Done
-
-Gap list delivered; verdict `ready` only when checklist passes and scoped tests green.
+- Boundary mocks only — align `portal-unit-test-common.md`
+- Does not replace `/unit`

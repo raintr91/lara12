@@ -1,35 +1,46 @@
 ---
 name: api
-description: >-
-  /api router for backend workflow. Routes to /api-spec (contract) or /api-code
-  (implementation) based on context.
+extractBundle: api
+description: /api — implement Laravel API from portal ir/spec.
 disable-model-invocation: true
 ---
 
-# /api — Backend Router
+# /api — Backend API
 
-| Step | Command | Skill |
-|------|---------|-------|
-| 1 Contract (Portal) | `/api-spec` | `.cursor/skills/api-spec/SKILL.md` |
-| 1 Contract (integration) | `/api-integration-spec` | `.cursor/skills/api-integration-spec/SKILL.md` |
-| 1 sync | `/api-update-spec` | `.cursor/skills/api-update-spec/SKILL.md` |
-| 1b Audit (Portal) | `/grill-api-spec` | `.cursor/skills/grill-api-spec/SKILL.md` |
-| 1b Audit (integration) | `/grill-integration-spec` | `.cursor/skills/grill-integration-spec/SKILL.md` |
-| 2 Code | `/api-code` | `.cursor/skills/api-code/SKILL.md` |
+**Extracts:** `extractBundle: api` → `.cursor/extracts/extract-registry.json`
 
-Router rules:
+## Scope
 
-- No `01-backend-spec.yaml` + **Portal-backed** → **Step 1** (`/api-spec`)
-- No `01-backend-spec.yaml` + **webhook / partner / no FE** → **Step 1 integration** (`/api-integration-spec`)
-- `feature.source.base: none` or `source.kind` webhook/partner → **integration** skills, not `/api-spec`
-- Portal specs changed / merge deferred child functions → **Step 1 sync** (`/api-update-spec`)
-- BE-only requirement (no FE contract change) → **Step 1 sync** (`/api-update-spec --be-only`)
-- Spec exists but not codegen-ready → **Step 1b** (`/grill-api-spec` or `/grill-integration-spec` by `source.kind`)
-- `approval.status` not `approved` → **Step 1b** (or wait for review)
-- `approval.status: approved` + explicit implement → **Step 2** (`/api-code`)
+Backend work in the configured backend project (`api/`) only — not Portal frontend files.
 
-Do not skip `/grill-api-spec` for new features, cross-portal, or legacy-derived contracts.
+## Backend repo commands
 
-PHPUnit coverage: **không** qua router `/api` — dùng `/unit` riêng (`.cursor/rules/team-flow-unit.mdc`).
+In `api/` workspace (see `api/.cursor/skills/api/SKILL.md`):
 
-Doc: `docs/operational/TEAM-AI-BACKEND-WORKFLOW.md`
+| Command | Step |
+|---------|------|
+| `/api-spec` | Portal spec → backend spec + OpenAPI + mock YAML |
+| `/grill-api-spec` | Audit backend contract before code (run in `api/` repo) |
+| `/api-code` | Approved backend spec → Laravel implementation |
+| `/api` | Router — defaults to spec if no approved backend spec |
+
+Hashtags: `#call-external`, `#cross-entity-service` → policy on **base-docs** (`product/shared/integrations/`). Detect/mark only here.
+
+## Before Work (from Portal)
+
+1. Resolve backend id via `legacy/project-config.md` (Grep `contract.backend` / `projects.<id>.root` only — **do not** paste full `platform-repos.json`). Stop if missing.
+2. Read feature `ir/spec.yaml` (and testcase only if needed for contract).
+3. Align contract keys with Portal `models/`.
+
+## Rules
+
+- Do not implement backend in the portal workspace.
+- Do not modify Portal UI unless explicitly requested.
+- Endpoints, validation, resources, permissions, backend tests per backend repo conventions.
+- Report every project read or changed.
+
+## Handoff
+
+Document paths, payloads, validation errors, permissions for `/wire`.
+
+**Backend repo pipeline:** `/api-spec` → `/grill-api-spec` → `/api-code` in `api/`. Portal `/grill-api` runs after implementation, before `/wire`.

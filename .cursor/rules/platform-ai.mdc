@@ -1,13 +1,12 @@
 ---
-description: AI layer first; feature docs = pilot; app code only when user asks
+description: Code-lane harness bias — gen/MCP first; app only when asked
 alwaysApply: true
 ---
 
 # Platform AI
 
-- **SSOT:** `.cursor/` (`skills/`, `rules/`, `extracts/`). Optional Kilo: `./scripts/cursor-export-kilo`.
-- **Default:** `docs/operational/`, `scripts/spec|docs/`, extract validate.
-- **App** (`pages/`, `components/`, …): base done — edit only on explicit feature request.
-- **`docs/features/**`:** guinea pig — no backward-compat for old spec paths; delete blockers.
-- **Legacy repos:** read-once into trace; portal yaml is disposable.
-- **App work:** apply `platform-invariants.mdc` + glob rules. Detail: `/platform-ai` skill.
+- **Harness SSOT:** `.cursor/` trên **repo code đang mở**.
+- **Gen / analyze / tags:** Artifactgraph MCP + `pnpm portal:gen` / `unit-gen` / `testcase:gen` — AI chỉ **gap** (`#needs-*`, Mo* chưa registry).
+- **Skills code:** `/platform-base` · `/platform-mark` · `/wire` · `/test` · `/unit` · `/model` (+ `/api` trên BE/fullstack).
+- **Không** author handbook/spec/plans trên code repo; không load docs-lane skills.
+- Bảo trì harness: `/platform-ai`.

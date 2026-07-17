@@ -1,37 +1,15 @@
 ---
-description: CodeGraph MCP — prefer codegraph_explore for structural code questions
-alwaysApply: true
+description: CodeGraph MCP — structural code explore (opt-in; not every chat)
+alwaysApply: false
 ---
 <!-- CODEGRAPH_START -->
 ## CodeGraph
 
-This project may have a CodeGraph MCP server (`codegraph_explore`). CodeGraph is a tree-sitter-parsed knowledge graph of symbols, edges, and files. Prefer it for **structural** app/legacy code questions.
+Khi hỏi **cấu trúc** source (call graph, định nghĩa, blast radius): ưu tiên `codegraph_explore` trước Grep/Read.
 
-### Use codegraph_explore instead of Grep/Read (structural)
+- Cross-repo: một `projectPath` qua `legacy/project-config.md` — không dump full maps.
+- Trust AST index; chỉ Grep khi miss.
+- **Không** thay spec/grill/legacy-dynamics trên docs hub — CodeGraph = evidence source, không SSOT domain.
 
-Reach for `codegraph_explore` **before** Grep/Glob/Read for: how does X work, how does X reach Y, what calls what, where is X defined, blast radius, surveying an area. One call returns verbatim line-numbered source, call paths (including dynamic dispatch), and dependents.
-
-Cross-repo (legacy / sibling): resolve **one** `projectPath` via `legacy/project-config.md` (Grep root) — do not Read entire `platform-repos.json` into context.
-
-### Rules of thumb
-
-- **Answer directly** — one `codegraph_explore` usually enough; follow up with more specific symbols if needed. Do not spawn a file-reading sub-agent that redoes discovery.
-- **Trust results** from AST index — do not re-verify with Grep unless CodeGraph missed something.
-- **Read/Grep only** for configs, docs, yaml specs, or details not in the graph.
-- **Staleness banner** — if response warns files pending re-index, Read those files only.
-
-### Platform-ai / grill (do not override)
-
-CodeGraph does **not** replace feature artifact flow:
-
-- Spec / grill / `/legacy-spec` → still docs + IR (`docs/features/**`, extracts). Read-once legacy into **trace** — do not reconstruct domain from CodeGraph alone.
-- Prefer CodeGraph when exploring **source** to fill evidence; write outcomes to yaml/trace, not as SSOT.
-
-Hub: `docs/operational/CODEGRAPH.md`
-
-### If `.codegraph/` doesn't exist
-
-MCP returns "not initialized." Ask: *"Project chưa có CodeGraph index. Chạy `codegraph init` (hoặc `codegraph init -i`) trong repo này?"*
-
-Win + WSL: index on the same OS filesystem as the code; Cursor on Windows may need `CODEGRAPH_NO_DAEMON=1` for WSL paths. See CODEGRAPH.md.
+Chưa có index: hỏi chạy `codegraph init` (WSL: xem `base-docs/platform/toolchain/CODEGRAPH.md`).
 <!-- CODEGRAPH_END -->

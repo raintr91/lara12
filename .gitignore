@@ -6,9 +6,11 @@ stg/.env
 # Node (docs tooling at repo root)
 node_modules/
 
-# Local project mappings for AI workflow
-.cursor/legacy-projects.local.json
-.cursor/team-projects.local.json
+# Local project maps (repo root SSOT)
+platform-repos.local.json
+legacy-repos.local.json
+.cursor/platform-repos.local.json
+.cursor/legacy-repos.local.json
 
 # Per-feature harness state (examples committed in .harness/*.example.*)
 .harness/progress.md
@@ -20,11 +22,8 @@ docs/.vitepress/.temp
 docs/public/openapi/openapi.yaml
 docs/public/swagger
 
-# Optional Kilo export (SSOT: .cursor/skills|rules|extracts — ./scripts/cursor-export-kilo)
+# Optional Kilo mirror (SSOT: .cursor/skills|rules|extracts)
 .kilo/skills/
 .kilo/instructions/
 .kilo/extracts/
 .kilo/command/
-
-platform-repos.local.json
-legacy-repos.local.json

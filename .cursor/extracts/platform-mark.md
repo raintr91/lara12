@@ -14,9 +14,9 @@ Grill lanes ask first; member confirms → apply mark in same session.
 |------|-----|------------|
 | common | `#common:{id}` | `marks[]` + optional `commonRefs[]` on routes/endpoints |
 | needs-common | `#needs-common:{id}` | `marks[]` — registry `status: planned` |
-| call-external | `#call-external` | `technicalMarks[]` + `externalCalls[]` |
-| cross-entity-service | `#cross-entity-service` | `technicalMarks[]` + `services[]` |
-| derived-data | `#derived-data` | `technicalMarks[]` + `derivedData` |
+| call-external | `#call-external` | `technicalMarks[]` + `externalCalls[]` — SSOT `base-docs/product/shared/integrations/call-external.md` |
+| cross-entity-service | `#cross-entity-service` | `technicalMarks[]` + `services[]` — SSOT `base-docs/product/shared/integrations/cross-entity-service.md` |
+| derived-data | `#derived-data` | `technicalMarks[]` + `derivedData` — SSOT `base-docs/product/shared/data-model/derived-data.md` |
 
 ## Mark kinds — UI (`portal-design.registry.json`)
 
@@ -26,7 +26,7 @@ Grill lanes ask first; member confirms → apply mark in same session.
 | needs-ui | `#needs-ui: {Widget}` | `tags:` — widget `planned` in design registry |
 | common-ui | Mo* in design registry `implemented` | promote after `/prototype`; re-run `portal:gen` |
 
-Common UI SSOT: `docs/common/yaml/` · promotion: `DESIGN-REGISTRY-PROMOTION.md`
+Common UI SSOT: `base-docs/product/common/yaml/` · promotion: `DESIGN-REGISTRY-PROMOTION.md`
 
 ## Spec block — `marks[]` (portal `ir/spec.yaml`)
 

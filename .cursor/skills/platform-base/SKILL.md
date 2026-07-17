@@ -1,53 +1,33 @@
 ---
 name: platform-base
-description: Nuxt 4 app conventions — layers, testId, E2E; see invariants + ARCHITECTURE.md
+description: Nuxt 4 FE conventions — layers, testId; gen first; see invariants (glob)
 disable-model-invocation: true
 ---
 
-# Platform Base (Nuxt 4)
+# Platform Base (Nuxt 4 FE)
 
-Auth-first Nuxt 4 · Vue 3 · Pinia · vee-validate+Zod · shadcn-vue · Playwright.
+Auth-first Nuxt 4 · Pinia · vee-validate+Zod · shadcn · Playwright.
 
-**Rules:** `platform-invariants.mdc`, `platform-contract-naming.mdc`, glob `platform-base-*`, `platform-code-size`, `platform-component-split`.
+**Rules (FE globs):** `platform-invariants.mdc`, `platform-contract-naming.mdc`, `platform-base-*`, size/split/import.
 
-**Docs:** `docs/operational/ARCHITECTURE.md`, `E2E-TESTIDS.md` · **E2E skill:** `test/SKILL.md`
+**Hub:** `base-docs/platform/toolchain/ARCHITECTURE.md`, `E2E-TESTIDS.md` · **E2E:** `/test`
 
-**Maps (only when cross-repo):** `legacy/project-config.md` — progressive resolve; never dump full `platform-repos.json`. Hub: `docs/operational/PROJECT-MAPS.md`.
+## Gen trước
 
-## Layers
+1. `pnpm portal:gen --id …` / Artifactgraph `gen` từ `ir/spec.yaml`
+2. AI chỉ gap: Mo* / `#needs-*` chưa có trong registry
+3. Không viết boilerplate layer bằng tay nếu gen đã cover
 
-`pages/components` → `composables` → `services` + `stores` → `models` + `validations` → `$apiFetch`
+## Layers (tóm tắt)
 
-| Tầng | Không làm |
-|------|-----------|
-| page/component | `$apiFetch` |
-| composable | HTTP chi tiết |
-| service | Pinia state |
-| models | import stores/services/composables |
+`pages/components` → `composables` → `services`+`stores` → `models`+`validations` → `$apiFetch`  
+Không `$apiFetch` ở page/component. Form: `useApiForm`.
 
-**New feature order:** models → service → store? → composable → validations? → page + testId
+UI: `ui/` → `Mo*` → `Data*|OrGlobal*` · shell `DataListPage`.
 
-**Form:** `useApiForm` + `validations/` (chặt) + `models/` (API contract lỏng).
+testId: `{module}-{field|action}-input|btn|dialog|alert` · `page.getByTestId()`.
 
-## UI tiers
+## Checklist
 
-`ui/` → `molecules/Mo*` → `organisms/Data*|OrGlobal*` · list shell: `DataListPage` · dashboard: `layouts/dashboard.vue`
-
-## testId (summary)
-
-`{module}-{field|action}-input|btn|dialog|alert` · auth: `auth-login-*` · `page.getByTestId()` · no `#id`/class selectors.
-
-**Detail:** [reference.md](reference.md) · `E2E-TESTIDS.md`
-
-## E2E
-
-```bash
-pnpm test:e2e    # NUXT_PUBLIC_E2E=1, port 3005
-```
-
-After `goto`: `assertLayoutIntegrity(page)` · specs `tests/e2e/**/*.spec.ts`
-
-## Agent checklist
-
-- [ ] 4 layers respected · file ~≤200 lines · testId on interactives
-- [ ] `/test` for full E2E — `/prototype` only smoke skeleton if needed
+- [ ] 4 tầng · file gọn · testId interactive
+- [ ] Full E2E → `/test` (không dump E2E rules khi chỉ prototype)

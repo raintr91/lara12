@@ -5,7 +5,7 @@ Mechanical PHPUnit scaffolding after `api:gen` — registry-driven patterns + `#
 ## Prerequisite
 
 ```bash
-pnpm api:gen --spec docs/features/{slug}/01-backend-spec.yaml
+pnpm api:gen --spec {base-docs product IR / --id}{slug}/01-backend-spec.yaml
 ```
 
 `crud-standard` profiles auto-run `api:unit-gen` at the end of `api:gen` (tag `#gen:test-unit`).  
@@ -15,8 +15,8 @@ pnpm api:gen --spec docs/features/{slug}/01-backend-spec.yaml
 
 ```bash
 pnpm api:unit-registry
-pnpm api:unit-gen:dry --spec docs/features/chain/hotel/01-backend-spec.yaml
-pnpm api:unit-gen --spec docs/features/chain/hotel/01-backend-spec.yaml
+pnpm api:unit-gen:dry --spec {base-docs product IR / --id}chain/hotel/01-backend-spec.yaml
+pnpm api:unit-gen --spec {base-docs product IR / --id}chain/hotel/01-backend-spec.yaml
 pnpm api:unit-gen --spec ... --phase enriched --force
 pnpm api:unit-gen --spec ... --phase stub --force   # refresh structural stubs only
 ```
@@ -49,8 +49,8 @@ Without `--force`, existing template outputs are skipped (`exists (use --force)`
 
 ## Output
 
-- `docs/features/{slug}/generated/unit.manifest.json` — `needsUnit[]`, `files[]`, `skippedPatterns[]`
-- `docs/features/{slug}/generated/UNIT-HANDOFF.md` — verify commands
+- `{base-docs product IR / --id}{slug}/generated/unit.manifest.json` — `needsUnit[]`, `files[]`, `skippedPatterns[]`
+- `{base-docs product IR / --id}{slug}/generated/UNIT-HANDOFF.md` — verify commands
 
 ## Tag DSL (`tags:` in `01-backend-spec.yaml`)
 

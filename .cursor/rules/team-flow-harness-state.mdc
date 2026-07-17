@@ -1,13 +1,12 @@
 ---
-description: Harness state files — progress handoff between backend sessions
+description: Harness state files — progress handoff between sessions
 globs: .harness/**/*
 alwaysApply: false
 ---
 
-# Harness State (API)
+# Harness State
 
-- `feature_list.json` — scope per feature; do not mark done without verify evidence
-- `progress.md` — handoff for the next session
-- When a public command advances phase, record: command, files changed, verify run/not run, remaining blockers
-
-Examples: `.harness/progress.example.md`, `.harness/feature_list.example.json`
+- `feature_list.json` — scope, không tự đánh done khi chưa verify
+- `progress.md` — handoff session tiếp theo
+- `registries/page-lifecycle.registry.json` + `base-docs/platform/toolchain/PAGE-LIFECYCLE.md` — stage cao nhất từng route; `portal:gen` / `portal:remove` / `portal:lifecycle sync` tự cập nhật
+- Khi command public cập nhật phase, ghi rõ: command, file đã đổi, verify đã chạy/chưa chạy, blocker còn lại.
