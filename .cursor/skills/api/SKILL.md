@@ -1,46 +1,69 @@
 ---
 name: api
-extractBundle: api
-description: /api — implement Laravel API from portal ir/spec.
+description: /api — backend API generation through Codegenkit BE adapters.
 disable-model-invocation: true
 ---
 
 # /api — Backend API
 
-**Extracts:** `extractBundle: api` → `.cursor/extracts/extract-registry.json`
+**Owner:** Codegenkit (`--type=be`)  
+**Adapters:** `fastapi` · `laravel` · `dotnet-integration`
 
-## Scope
+## Generate
 
-Backend work in the configured backend project (`api/`) only — not Portal frontend files.
+```bash
+codegenkit api-gen:dry --adapter=fastapi -- --spec /path/to/ir/spec.yaml
+codegenkit api-gen --adapter=fastapi -- --spec /path/to/ir/spec.yaml
+codegenkit api-gen --adapter=fastapi -- --spec /path/to/ir/spec.yaml --force
+codegenkit api-unit-gen:dry --adapter=fastapi -- --spec /path/to/ir/spec.yaml
 
-## Backend repo commands
+codegenkit api-gen:dry --adapter=laravel -- --spec /path/to/ir/spec.yaml
+codegenkit api-gen --adapter=laravel -- --spec /path/to/ir/spec.yaml
 
-In `api/` workspace (see `api/.cursor/skills/api/SKILL.md`):
+codegenkit api-unit-gen:dry --adapter=laravel -- --spec /path/to/ir/spec.yaml
+codegenkit api-registry --adapter=laravel
+codegenkit api-unit-registry --adapter=laravel
 
-| Command | Step |
-|---------|------|
-| `/api-spec` | Portal spec → backend spec + OpenAPI + mock YAML |
-| `/grill-api-spec` | Audit backend contract before code (run in `api/` repo) |
-| `/api-code` | Approved backend spec → Laravel implementation |
-| `/api` | Router — defaults to spec if no approved backend spec |
+codegenkit api-gen:dry --adapter=dotnet-integration -- --spec ir/spec.yaml
+codegenkit api-gen --adapter=dotnet-integration -- --spec ir/spec.yaml
+codegenkit api-registry --adapter=dotnet-integration
+```
 
-Hashtags: `#call-external`, `#cross-entity-service` → policy on **base-docs** (`product/shared/integrations/`). Detect/mark only here.
+The selected backend repository is the only write target. Never infer a sibling
+docs hub or frontend checkout.
 
-## Before Work (from Portal)
+Laravel supports the detected `modules-v1` profile only. FastAPI requires an
+explicit Python runtime or target virtual environment.
 
-1. Resolve backend id via `legacy/project-config.md` (Grep `contract.backend` / `projects.<id>.root` only — **do not** paste full `platform-repos.json`). Stop if missing.
-2. Read feature `ir/spec.yaml` (and testcase only if needed for contract).
-3. Align contract keys with Portal `models/`.
+`dotnet-integration` requires the .NET 8 SDK (`CODEGENKIT_DOTNET`, then
+`dotnet`) and supports the pilot-specific `mes-downtime` profile. Its API pass
+already emits test source; it has no separate API unit-generation engine.
 
-## Rules
+FastAPI generates all nested module entities, with flat `entities` and legacy
+`codegen.entity` compatibility. Code and unit manifests retain SHA-256
+ownership: identical and unmodified managed files are safe, while unmanaged or
+locally modified files block the whole batch. Inspect dry-run statuses before
+using `--force`, which explicitly overwrites conflicts. Ambiguous global
+endpoints in a multi-entity spec are not shared across entities; the generator
+warns and uses entity-local CRUD defaults.
 
-- Do not implement backend in the portal workspace.
-- Do not modify Portal UI unless explicitly requested.
-- Endpoints, validation, resources, permissions, backend tests per backend repo conventions.
-- Report every project read or changed.
+## Review requirements
 
-## Handoff
+- Replace generated auth/authorization placeholders with project policy.
+- Verify validation, resources/presenters, transactions and error mapping.
+- Run backend tests and `/business-impact-review` for risky changes.
 
-Document paths, payloads, validation errors, permissions for `/wire`.
+## Accelerators (optional)
 
-**Backend repo pipeline:** `/api-spec` → `/grill-api-spec` → `/api-code` in `api/`. Portal `/grill-api` runs after implementation, before `/wire`.
+```text
+if ArtifactGraph available: allowlist/recommend API generation
+else: execute Codegenkit adapter directly
+
+if CodeGraph available: inspect existing module conventions/callers
+else: targeted repository search and reads
+```
+
+Missing accelerators never block API generation. Complete each documented
+direct or targeted-local fallback first, then follow
+`.cursor/rules/codegenkit-optional-integrations.mdc` for deduplicated
+once-per-run-and-optional telemetry with observed metrics only.

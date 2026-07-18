@@ -27,3 +27,13 @@ docs/public/swagger
 .kilo/instructions/
 .kilo/extracts/
 .kilo/command/
+
+# Generated per machine by package init (local executable/workspace paths).
+.cursor/mcp.json
+.mcp.json
+.kilocode/mcp.json
+.gemini/settings.json
+.claude.json
+
+# Package install-state (machine/local; recreated by init/status).
+.processkit/

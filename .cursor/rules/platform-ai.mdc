@@ -1,12 +1,11 @@
 ---
-description: Code-lane harness bias — gen/MCP first; app only when asked
+description: Platform AI — backend lane boundary and portability
 alwaysApply: true
 ---
 
-# Platform AI
+# Platform AI — backend
 
-- **Harness SSOT:** `.cursor/` trên **repo code đang mở**.
-- **Gen / analyze / tags:** Artifactgraph MCP + `pnpm portal:gen` / `unit-gen` / `testcase:gen` — AI chỉ **gap** (`#needs-*`, Mo* chưa registry).
-- **Skills code:** `/platform-base` · `/platform-mark` · `/wire` · `/test` · `/unit` · `/model` (+ `/api` trên BE/fullstack).
-- **Không** author handbook/spec/plans trên code repo; không load docs-lane skills.
-- Bảo trì harness: `/platform-ai`.
+- Current repository is the BE implementation lane.
+- `/api`, `/grill-api`, and impact review are local when installed.
+- FE/docs/tests work remains a handoff; never infer sibling checkout paths.
+- Adapter selection is explicit (`fastapi` or `laravel`); do not mix stack rules.

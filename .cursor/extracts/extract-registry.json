@@ -4,121 +4,17 @@
     "core": [
       ".cursor/extracts/core/agent-discipline.md"
     ],
-    "flow-trace": [
-      ".cursor/extracts/core/agent-discipline.md",
-      ".cursor/extracts/legacy/project-config.md",
-      ".cursor/extracts/flow-trace.md"
-    ],
-    "legacy-spec": [
-      ".cursor/extracts/core/agent-discipline.md",
-      ".cursor/extracts/legacy/project-config.md",
-      ".cursor/extracts/legacy/legacy-api-migration.md",
-      ".cursor/extracts/legacy/evidence.md",
-      ".cursor/extracts/legacy/parity.md",
-      ".cursor/extracts/spec/split.md",
-      ".cursor/extracts/legacy-dynamics.md"
-    ],
     "platform-ai": [
-      ".cursor/extracts/extract-registry.json"
-    ],
-    "platform-mark": [
-      ".cursor/extracts/core/agent-discipline.md",
-      ".cursor/extracts/platform-mark.md",
-      ".cursor/extracts/platform-mark-detect.md",
-      ".cursor/extracts/platform-design-registry.md",
-      ".cursor/extracts/codegen/tags.md"
-    ],
-    "update-spec-legacy": [
-      ".cursor/extracts/core/agent-discipline.md",
-      ".cursor/extracts/legacy/project-config.md",
-      ".cursor/extracts/legacy/legacy-api-migration.md",
-      ".cursor/extracts/legacy/evidence.md",
-      ".cursor/extracts/legacy-dynamics.md",
-      ".cursor/extracts/spec-update-delta.md"
-    ],
-    "spec-requirement": [
-      ".cursor/extracts/core/agent-discipline.md",
-      ".cursor/extracts/spec/split.md",
-      ".cursor/extracts/spec-incremental-blocks.md",
-      ".cursor/extracts/common-ui-spec.md",
-      "base-docs/templates/bundle-authoring.md"
-    ],
-    "bqa-grill": [
-      ".cursor/extracts/core/agent-discipline.md",
-      ".cursor/extracts/grill/validation.md",
-      ".cursor/extracts/grill/roles.md",
-      ".cursor/extracts/common-ui-spec.md",
-      ".cursor/extracts/spec/split.md",
-      ".cursor/extracts/grill-tech-debt.md"
-    ],
-    "dev-grill": [
-      ".cursor/extracts/core/agent-discipline.md",
-      ".cursor/extracts/grill/roles.md",
-      ".cursor/extracts/codegen/readiness.md",
-      ".cursor/extracts/codegen/tags.md",
-      ".cursor/extracts/platform-mark-detect.md",
-      ".cursor/extracts/legacy/legacy-api-migration.md",
-      ".cursor/extracts/grill-tech-debt.md",
-      ".cursor/extracts/spec-update-tags.md",
-      ".cursor/extracts/portal-unit-test-tags.md"
-    ],
-    "grill-with-docs": [
-      ".cursor/extracts/core/agent-discipline.md",
-      ".cursor/extracts/grill/validation.md",
-      ".cursor/extracts/grill/roles.md",
-      ".cursor/extracts/codegen/readiness.md",
-      ".cursor/extracts/codegen/tags.md",
-      ".cursor/extracts/platform-mark-detect.md",
-      ".cursor/extracts/common-ui-spec.md",
-      ".cursor/extracts/spec/split.md",
-      ".cursor/extracts/grill-tech-debt.md"
-    ],
-    "update-spec": [
-      ".cursor/extracts/core/agent-discipline.md",
-      ".cursor/extracts/grill/roles.md",
-      ".cursor/extracts/spec-update-delta.md",
-      ".cursor/extracts/spec-update-tags.md",
-      ".cursor/extracts/feature-lifecycle-status.md"
-    ],
-    "test": [
-      ".cursor/extracts/core/agent-discipline.md",
-      ".cursor/extracts/test/readiness.md",
-      ".cursor/extracts/verify-gate.md"
-    ],
-    "grill-test": [
-      ".cursor/extracts/core/agent-discipline.md",
-      ".cursor/extracts/test/readiness.md",
-      ".cursor/extracts/verify-gate.md"
-    ],
-    "unit": [
-      ".cursor/extracts/core/agent-discipline.md",
-      ".cursor/extracts/portal-unit-workflow.md",
-      ".cursor/extracts/portal-unit-test-tags.md",
-      ".cursor/extracts/portal-unit-test-common.md",
-      ".cursor/extracts/verify-gate.md"
-    ],
-    "grill-unit": [
-      ".cursor/extracts/core/agent-discipline.md",
-      ".cursor/extracts/portal-unit-workflow.md",
-      ".cursor/extracts/verify-gate.md"
+      ".cursor/extracts/core/agent-discipline.md"
     ],
     "api": [
-      ".cursor/extracts/core/agent-discipline.md",
-      ".cursor/extracts/legacy/project-config.md",
-      ".cursor/extracts/verify-gate.md"
+      ".cursor/extracts/core/agent-discipline.md"
     ],
     "grill-api": [
       ".cursor/extracts/core/agent-discipline.md"
     ],
-    "wire": [
-      ".cursor/extracts/core/agent-discipline.md",
-      ".cursor/extracts/legacy/project-config.md",
-      ".cursor/extracts/verify-gate.md",
-      ".cursor/extracts/wire/integration.md"
-    ],
-    "model": [
-      ".cursor/extracts/core/agent-discipline.md",
-      ".cursor/extracts/legacy/project-config.md"
+    "business-impact-review": [
+      ".cursor/extracts/risk-classes.md"
     ]
   }
 }

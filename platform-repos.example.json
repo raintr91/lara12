@@ -17,15 +17,12 @@
         ],
         "skills": [
           "platform-ai",
-          "platform-base",
-          "platform-mark",
           "api",
           "grill-api",
-          "wire",
-          "unit",
-          "grill-unit"
+          "business-impact-review"
         ],
-        "note": "Laravel BE current repository only"
+        "adapter": "laravel",
+        "note": "Laravel BE — current repository only"
       }
     }
   },
@@ -44,7 +41,8 @@
       "role": "be",
       "stack": "laravel",
       "repo": "api",
-      "skill": "api-base",
+      "url": "https://github.com/raintr91/lara12",
+      "skill": "platform-ai",
       "description": "Base Laravel 12 (BE)",
       "write": true
     }

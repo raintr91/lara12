@@ -65,7 +65,7 @@
       "layer": "support",
       "phase": "enriched",
       "template": "support/ModuleTestSupport.php.hbs",
-      "output": "src/Modules/{module}/Tests/Support/ModuleTestSupport.php",
+      "output": "Modules/{module}/Tests/Support/ModuleTestSupport.php",
       "profiles": ["crud-standard", "patch"],
       "fallbackTag": "#needs-unit-test:support:ModuleTestSupport"
     },
@@ -75,7 +75,7 @@
       "layer": "request",
       "phase": "enriched",
       "template": "requests/request-enriched.test.php.hbs",
-      "output": "src/Modules/{module}/Tests/Unit/Http/Requests/{requestClass}Test.php",
+      "output": "Modules/{module}/Tests/Unit/Http/Requests/{requestClass}Test.php",
       "profiles": ["crud-standard", "patch"],
       "when": { "any": [{ "hasModuleRequests": true }] },
       "fallbackTag": "#needs-unit-test:request-hooks:{entity}"
@@ -86,7 +86,7 @@
       "layer": "controller-invoke",
       "phase": "enriched",
       "template": "controllers/controller-invoke.test.php.hbs",
-      "output": "src/Modules/{module}/Tests/Feature/Http/Controllers/{entity}ControllerInvokeTest.php",
+      "output": "Modules/{module}/Tests/Feature/Http/Controllers/{entity}ControllerInvokeTest.php",
       "profiles": ["crud-standard", "patch"],
       "fallbackTag": "#needs-unit-test:controller-invoke:{entity}"
     },
@@ -95,7 +95,7 @@
       "layer": "request",
       "phase": "behavioral",
       "template": "requests/rules-keys.behavior.test.php.hbs",
-      "output": "src/Modules/{module}/Tests/Unit/Http/Requests/{entity}SearchRequestRulesKeysBehaviorTest.php",
+      "output": "Modules/{module}/Tests/Unit/Http/Requests/{entity}SearchRequestRulesKeysBehaviorTest.php",
       "profiles": ["crud-standard", "patch"],
       "when": { "any": [{ "wire": "search" }] },
       "fallbackTag": "#needs-unit-test:request:{entity}:rules"
@@ -105,7 +105,7 @@
       "layer": "request",
       "phase": "behavioral",
       "template": "requests/default-per-page.behavior.test.php.hbs",
-      "output": "src/Modules/{module}/Tests/Unit/Http/Requests/{entity}SearchRequestDefaultPerPageBehaviorTest.php",
+      "output": "Modules/{module}/Tests/Unit/Http/Requests/{entity}SearchRequestDefaultPerPageBehaviorTest.php",
       "profiles": ["crud-standard", "patch"],
       "when": { "any": [{ "manualAction": "default-per-page" }] },
       "fallbackTag": "#needs-unit-test:request:{entity}:default-per-page"
@@ -121,7 +121,7 @@
         ]
       },
       "template": "queries/chain-scope.behavior.test.php.hbs",
-      "output": "src/Modules/{module}/Tests/Unit/Http/Queries/{entity}QueryChainScopeBehaviorTest.php",
+      "output": "Modules/{module}/Tests/Unit/Http/Queries/{entity}QueryChainScopeBehaviorTest.php",
       "fallbackTag": "#needs-unit-test:query:{entity}:chain-scope"
     },
     "action.relationshipSync": {
@@ -135,7 +135,7 @@
         ]
       },
       "template": "actions/relationship-sync.behavior.test.php.hbs",
-      "output": "src/Modules/{module}/Tests/Unit/Http/Actions/{entity}ActionRelationshipsBehaviorTest.php",
+      "output": "Modules/{module}/Tests/Unit/Http/Actions/{entity}ActionRelationshipsBehaviorTest.php",
       "fallbackTag": "#needs-unit-test:action:{entity}:relationships"
     },
     "resource.openapiShape": {
@@ -143,7 +143,7 @@
       "layer": "resource",
       "phase": "behavioral",
       "template": "resources/openapi-shape.behavior.test.php.hbs",
-      "output": "src/Modules/{module}/Tests/Unit/Http/Resources/{entity}ResourceOpenApiShapeBehaviorTest.php",
+      "output": "Modules/{module}/Tests/Unit/Http/Resources/{entity}ResourceOpenApiShapeBehaviorTest.php",
       "profiles": ["crud-standard", "patch"],
       "fallbackTag": "#needs-unit-test:resource:{entity}:openapi-shape"
     },
@@ -153,7 +153,7 @@
       "phase": "behavioral",
       "when": { "any": [{ "manualAction": "nested-managers-resource" }] },
       "template": "resources/nested-relations.behavior.test.php.hbs",
-      "output": "src/Modules/{module}/Tests/Unit/Http/Resources/{entity}ResourceNestedRelationsBehaviorTest.php",
+      "output": "Modules/{module}/Tests/Unit/Http/Resources/{entity}ResourceNestedRelationsBehaviorTest.php",
       "fallbackTag": "#needs-unit-test:resource:{entity}:nested-managers"
     },
     "service.exportOpenRate": {

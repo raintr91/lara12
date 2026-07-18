@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "package": "@platform/codegenkit",
+  "packageVersion": "0.5.0",
+  "type": "be",
+  "adapters": {
+    "be": "laravel"
+  },
+  "toolApi": 1,
+  "harnessApi": 1,
+  "files": {
+    ".cursor/rules/codegenkit-optional-integrations.mdc": {
+      "source": "harness/shared/rules/codegenkit-optional-integrations.mdc",
+      "sha256": "391af1eb0808f704cafa990bc2cd57e4293cb2349e5dcad6bae871cb76647eda"
+    },
+    ".cursor/schemas/codegenkit/missing-optional-event.schema.json": {
+      "source": "harness/shared/schemas/codegenkit/missing-optional-event.schema.json",
+      "sha256": "7cd19cd4bc6357ebbb5d7d1014021e1c226504cacb7552fb640ee2a6c8026366"
+    },
+    ".cursor/skills/api/SKILL.md": {
+      "source": "harness/be/skills/api/SKILL.md",
+      "sha256": "05847f1c34e5f1a14a2c1ddefd116c4cd4f1913cc41b99637f31dda8634ebe24"
+    },
+    ".cursor/skills/grill-api/SKILL.md": {
+      "source": "harness/be/skills/grill-api/SKILL.md",
+      "sha256": "9f497878d8bfbdff8ab7be9035cebfbb488d5736c76c3fba55747ca83c73c102"
+    },
+    "registries/codegen.registry.json": {
+      "source": "adapters/laravel/registries/codegen.registry.json",
+      "sha256": "37cdb2a11fe373d8c9e98fb2d30ca9cdc2cafba13868ec96b7d1dfac11ec2a68"
+    },
+    "registries/unit-test.registry.json": {
+      "source": "adapters/laravel/registries/unit-test.registry.json",
+      "sha256": "19b43832a7f0b1436059bc0726764f2fd358d7f46f051bf66aa9701b8368fd1d"
+    }
+  }
+}

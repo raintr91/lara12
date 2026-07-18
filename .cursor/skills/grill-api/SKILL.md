@@ -1,27 +1,35 @@
 ---
 name: grill-api
-extractBundle: grill-api
-description: /grill-api — review API spec vs legacy.
+description: /grill-api — audit generated FastAPI/Laravel API before integration.
 disable-model-invocation: true
 ---
 
-# /grill-api — API Implementation Check (Portal)
+# /grill-api
 
-After backend `/api-code` in `api/` repo, before Portal `/wire`.
+Run after `codegenkit api-gen:dry` and after implementation.
 
-For **contract YAML** audit before coding, use `/grill-api-spec` in `api/` repo (not this command).
+Check:
 
-**Extracts:** `extractBundle: grill-api` → `.cursor/extracts/extract-registry.json`
+- Routes/methods/statuses match the input contract.
+- AuthZ and tenant scope use trusted context.
+- Validation does not accept request-bag noise.
+- Null/empty/error semantics remain distinct.
+- Writes are transaction-safe; async retries are idempotent.
+- Generated placeholders are replaced before ship.
 
-## Checklist
+## Accelerators (optional)
 
-- Endpoints cover spec actions (CRUD/import/export/login-as/etc.).
-- No legacy page-init APIs; create/login SPA-init; detail API for edit/copy.
-- Request/response keys, relationships, pagination match FE `models/`.
-- Validation, permission, error shapes documented for `/wire`.
-- Backend test or verification status recorded.
+```text
+if ArtifactGraph available: contract/tag/parity hints
+else: scoped contract-to-code comparison
 
-## Guardrails
+if CodeGraph available: callers/routes/jobs/listeners
+else: targeted repository search
+```
 
-- No Portal UI edits; no contract renames for FE convenience.
-- No "complete" without backend evidence.
+Missing accelerators never block the grill. Complete each scoped model or
+targeted-local fallback first, then follow
+`.cursor/rules/codegenkit-optional-integrations.mdc` for deduplicated
+once-per-run-and-optional telemetry with observed metrics only.
+
+Handoff verified payloads/errors/permissions to FE `/wire`.
