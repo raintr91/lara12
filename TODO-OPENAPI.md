@@ -2,9 +2,10 @@
 
 OpenAPI **source** không còn thuộc repo `api`. Theo cấu trúc mới: contract SSOT
 (api spec + `02-openapi.yaml` + `03-mock-data.yaml`) sống trên **base-docs**
-(docs hub). Repo `api` chỉ giữ **code API thật** (Laravel `src/`, `unitgen/`,
-`registries/`, codegen runners). Bundle/preview/swagger là build artifact, không
-commit.
+(docs hub). Repo `api` chỉ giữ **code API thật** (Laravel `src/`). Codegen/unitgen/
+`registries/` do Codegenkit sync khi `init` (gitignored, không commit); bản PHP
+unitgen xem `codegenkit/TODO-UNITGEN-LARAVEL.md`. Bundle/preview/swagger là build
+artifact, không commit.
 
 Đã xoá bên `api` (nội dung giữ lại bên dưới để không mất):
 - `openapi/base.yaml`, `openapi/api.yaml`, `openapi/index.md`
@@ -16,9 +17,9 @@ commit.
 
 - [ ] Chốt vị trí OpenAPI. **Đề xuất: per-feature** cạnh api spec —
       `product/**/code/API-*/02-openapi.yaml`.
-      Lý do: `api/unitgen/runners/lib/spec-extract.mjs` resolve
-      `02-openapi.yaml` **cùng thư mục** với `01-backend-spec.yaml`
-      (`resolveOpenApiPath` = `dirname(specFile)/02-openapi.yaml`). Đặt
+      Lý do: unitgen resolve `02-openapi.yaml` **cùng thư mục** với
+      `01-backend-spec.yaml` (`resolveOpenApiPath` = `dirname(specFile)/02-openapi.yaml`).
+      Đặt
       per-feature là chạy được ngay, không cần sửa runner.
 - [ ] Health/base fragment: đưa vào catalog chung
       `product/shared/api-catalog/` (hiện chỉ có `index.md`) hoặc feature

@@ -30,13 +30,11 @@ codegenkit api-gen --adapter=laravel -- --spec /path/to/ir/spec.yaml
 codegenkit api-unit-registry --adapter=laravel
 codegenkit api-unit-gen:dry --adapter=laravel -- --spec /path/to/ir/spec.yaml
 codegenkit api-unit-gen --adapter=laravel -- --spec /path/to/ir/spec.yaml
-
-pnpm api:unit-registry
-pnpm api:unit-gen:dry --spec /path/to/backend/01-backend-spec.yaml
-pnpm api:unit-gen --spec /path/to/backend/01-backend-spec.yaml
 ```
 
-Use Codegenkit commands for the package-owned generator. The `pnpm api:unit-*` aliases remain repo-local runners for the current Laravel checkout.
+Codegen/unitgen do **Codegenkit** sở hữu. Node runner ở root repo đã gỡ; bản PHP
+sẽ được `codegenkit init` sync vào `src/.codegenkit/` (chạy bằng `php`, không cần
+Node ở root). Xem `codegenkit/TODO-UNITGEN-LARAVEL.md`.
 
 > OpenAPI (`02-openapi.yaml`) SSOT nằm cạnh `01-backend-spec.yaml` trên base-docs; unitgen đọc trực tiếp từ `--spec`. Xem `TODO-OPENAPI.md`.
 

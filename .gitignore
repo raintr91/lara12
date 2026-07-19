@@ -29,6 +29,8 @@ legacy-repos.local.json
 .codegenkit/
 .platform-dna/
 .processkit/
+registries/
+src/.codegenkit/
 .mcp.json
 .claude.json
 .claude/

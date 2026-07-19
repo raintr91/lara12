@@ -1,15 +1,17 @@
 # API (Laravel)
 
-Backend Laravel modular — code API thật + unitgen + harness AI (code lane).
+Backend Laravel modular — chỉ **code API thật**. Tooling (codegen, unitgen,
+registries, harness) do toolkit sync khi `init`, không commit.
 
 ```text
 api/
 ├── src/               # Laravel app (SSOT code)
-├── unitgen/           # PHPUnit generation
-├── registries/        # codegen + unit-test registries (Codegenkit)
-├── package.json       # unitgen runners
+├── docs/              # operational guides (link tới base-docs)
 └── .cursor/           # local harness (gitignored — from toolkit init)
 ```
+
+Sync khi init (gitignored): `.cursor/` · `.codegenkit/` · `registries/` ·
+`src/.codegenkit/` (PHP unitgen — xem `codegenkit/TODO-UNITGEN-LARAVEL.md`).
 
 Contract SSOT (api spec · `02-openapi.yaml` · mock) sống trên **base-docs**
 (docs hub), không ở repo này. Xem `TODO-OPENAPI.md`.
@@ -24,14 +26,6 @@ php artisan key:generate
 ```
 
 Docker: [docker/README.md](docker/README.md)
-
-## Unit gen
-
-```bash
-pnpm api:unit-gen
-pnpm api:unit-gen:dry
-pnpm api:unit-registry
-```
 
 ## AI harness (code lane)
 
