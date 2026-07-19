@@ -10,10 +10,6 @@ node_modules/
 platform-repos.local.json
 legacy-repos.local.json
 
-# Per-feature harness state (examples committed in .harness/*.example.*)
-.harness/progress.md
-.harness/feature_list.json
-
 # Docs site build artifacts (source lives in docs/)
 docs/.vitepress/dist
 docs/.vitepress/.temp
