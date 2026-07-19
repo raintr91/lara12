@@ -4,22 +4,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "openapi:render": "echo 'openapi:render scripts moved/deleted with scripts/docs — restore from git if still needed for serve' && exit 1",
-    "openapi:lint": "pnpm openapi:render",
-    "openapi:bundle": "redocly bundle openapi/api.yaml -o public/openapi/openapi.yaml",
-    "openapi:preview": "redocly preview-docs openapi/api.yaml --host 0.0.0.0 --port 8081",
     "api:unit-gen": "node unitgen/runners/generate.mjs",
     "api:unit-gen:dry": "node unitgen/runners/generate.mjs --dry-run",
     "api:unit-registry": "node unitgen/runners/validate-registry.mjs"
   },
   "devDependencies": {
     "handlebars": "^4.7.9",
-    "@braintree/sanitize-url": "^7.1.2",
-    "@redocly/cli": "^2.34.0",
-    "dayjs": "^1.11.21",
-    "debug": "^4.4.0",
-    "mermaid": "^11.16.0",
-    "swagger-ui-dist": "^5.32.6",
     "yaml": "^2.9.0"
   }
 }

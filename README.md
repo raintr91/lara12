@@ -1,17 +1,18 @@
 # API (Laravel)
 
-Backend Laravel modular — OpenAPI serve, unitgen, harness AI (code lane).
+Backend Laravel modular — code API thật + unitgen + harness AI (code lane).
 
 ```text
 api/
-├── openapi/           # OpenAPI source (Redocly)
-├── public/openapi/    # bundled output
-├── package.json       # openapi:* · unitgen
-├── unitgen/
-├── src/               # Laravel app
+├── src/               # Laravel app (SSOT code)
+├── unitgen/           # PHPUnit generation
 ├── registries/        # codegen + unit-test registries (Codegenkit)
+├── package.json       # unitgen runners
 └── .cursor/           # local harness (gitignored — from toolkit init)
 ```
+
+Contract SSOT (api spec · `02-openapi.yaml` · mock) sống trên **base-docs**
+(docs hub), không ở repo này. Xem `TODO-OPENAPI.md`.
 
 ## Quick start (Laravel)
 
@@ -23,13 +24,6 @@ php artisan key:generate
 ```
 
 Docker: [docker/README.md](docker/README.md)
-
-## OpenAPI (repo này)
-
-```bash
-pnpm openapi:bundle
-pnpm openapi:preview
-```
 
 ## Unit gen
 

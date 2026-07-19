@@ -31,7 +31,6 @@ codegenkit api-unit-registry --adapter=laravel
 codegenkit api-unit-gen:dry --adapter=laravel -- --spec /path/to/ir/spec.yaml
 codegenkit api-unit-gen --adapter=laravel -- --spec /path/to/ir/spec.yaml
 
-pnpm openapi:bundle
 pnpm api:unit-registry
 pnpm api:unit-gen:dry --spec /path/to/backend/01-backend-spec.yaml
 pnpm api:unit-gen --spec /path/to/backend/01-backend-spec.yaml
@@ -39,13 +38,14 @@ pnpm api:unit-gen --spec /path/to/backend/01-backend-spec.yaml
 
 Use Codegenkit commands for the package-owned generator. The `pnpm api:unit-*` aliases remain repo-local runners for the current Laravel checkout.
 
+> OpenAPI (`02-openapi.yaml`) SSOT nằm cạnh `01-backend-spec.yaml` trên base-docs; unitgen đọc trực tiếp từ `--spec`. Xem `TODO-OPENAPI.md`.
+
 ## Outputs
 
 | Pipeline | Output |
 |----------|--------|
 | API generation | Laravel modules/models/controllers under `src/` plus `generated/codegen.manifest.json` and `HANDOFF.md` |
 | Unit generation | PHPUnit files plus `generated/unit.manifest.json` and `UNIT-HANDOFF.md` |
-| OpenAPI | `public/openapi/openapi.yaml` |
 
 ## References
 

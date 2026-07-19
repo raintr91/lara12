@@ -2,7 +2,8 @@
 
 > **R2/R3:** Product Code + architecture → [`base-docs`](https://github.com/raintr91/base_docs) · E2E plans → [`base-tests`](https://github.com/raintr91/base_test) · gen: `pnpm portal:gen --id …` / `pnpm testcase:gen --id …` · [Hub split](https://github.com/raintr91/base_test/blob/main/docs/HUBS.md) / [Docs hub](https://github.com/raintr91/base_docs) / [Tests hub](https://github.com/raintr91/base_test/blob/main/docs/TESTS-HUB.md)
 
-Laravel modular API — OpenAPI serve, `api:unit-gen`, repository-local AI harness (code lane).
+Laravel modular API — `api:unit-gen`, repository-local AI harness (code lane).
+Contract SSOT (api spec · `02-openapi.yaml` · mock) → [`base-docs`](https://github.com/raintr91/base_docs); repo này chỉ giữ code thật. Xem `TODO-OPENAPI.md`.
 
 ---
 
@@ -10,12 +11,11 @@ Laravel modular API — OpenAPI serve, `api:unit-gen`, repository-local AI harne
 
 ```text
 api/
-├── openapi/           # OpenAPI source (Redocly)
-├── public/openapi/    # bundled output
-├── package.json       # openapi:* · unitgen
-├── unitgen/
-├── src/               # Laravel app
-└── .cursor/           # code-lane skills
+├── src/               # Laravel app (SSOT code)
+├── unitgen/           # PHPUnit generation
+├── registries/        # Codegenkit registries
+├── package.json       # unitgen runners
+└── .cursor/           # code-lane skills (gitignored)
 ```
 
 ---
@@ -35,14 +35,7 @@ php artisan key:generate
 
 Container stack: [docker/README.md](../../docker/README.md)
 
-### 3. OpenAPI
-
-```bash
-pnpm openapi:bundle    # openapi/api.yaml → public/openapi/openapi.yaml
-pnpm openapi:preview   # Redocly preview
-```
-
-### 4. Unit gen
+### 3. Unit gen
 
 ```bash
 pnpm api:unit-gen
