@@ -1,34 +1,9 @@
 {
   "$schema": "https://github.com/raintr91/platform-dna/blob/main/templates/schemas/platform-repos.schema.json",
   "defaultGroup": "be",
-  "harness": {
-    "defaultByRole": {
-      "backend": "be",
-      "be": "be"
-    },
-    "syncPolicy": {
-      "mode": "propose",
-      "description": "Current BE repository only; package init merges only package-owned BE skill IDs."
-    },
-    "profiles": {
-      "be": {
-        "groups": [
-          "be"
-        ],
-        "skills": [
-          "platform-ai",
-          "api",
-          "grill-api",
-          "business-impact-review"
-        ],
-        "adapter": "laravel",
-        "note": "Laravel BE — current repository only"
-      }
-    }
-  },
   "groups": {
     "be": {
-      "description": "Backend current repository",
+      "description": "BE current repository",
       "primary": "api",
       "projects": [
         "api"
@@ -39,11 +14,7 @@
     "api": {
       "root": ".",
       "role": "be",
-      "stack": "laravel",
       "repo": "api",
-      "url": "https://github.com/raintr91/lara12",
-      "skill": "platform-ai",
-      "description": "Base Laravel 12 (BE)",
       "write": true
     }
   }

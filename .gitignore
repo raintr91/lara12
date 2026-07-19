@@ -3,14 +3,12 @@
 prod/.env
 stg/.env
 
-# Node (docs tooling at repo root)
+# Node (repo-root tooling)
 node_modules/
 
-# Local project maps (repo root SSOT)
+# Local project maps (machine paths — never commit)
 platform-repos.local.json
 legacy-repos.local.json
-.cursor/platform-repos.local.json
-.cursor/legacy-repos.local.json
 
 # Per-feature harness state (examples committed in .harness/*.example.*)
 .harness/progress.md
@@ -22,18 +20,28 @@ docs/.vitepress/.temp
 docs/public/openapi/openapi.yaml
 docs/public/swagger
 
-# Optional Kilo mirror (SSOT: .cursor/skills|rules|extracts)
+# Optional Kilo mirror (SSOT after init: .cursor/skills|rules|extracts)
 .kilo/skills/
 .kilo/instructions/
 .kilo/extracts/
 .kilo/command/
 
-# Generated per machine by package init (local executable/workspace paths).
-.cursor/mcp.json
-.mcp.json
-.kilocode/mcp.json
-.gemini/settings.json
-.claude.json
+# CodeGraph local index (repo-owned; outside toolkit ignore contract)
+.codegraph/
+.codegraph-*/
 
-# Package install-state (machine/local; recreated by init/status).
+# Toolkit-managed — also merged by platform-dna / codegenkit / processkit init.
+# Do not hand-edit these blocks; re-run init to refresh.
+.cursor/
+.codegenkit/
+.platform-dna/
 .processkit/
+.mcp.json
+.claude.json
+.claude/
+.codex/
+.hermes/
+.gemini/
+.kiro/
+.kilocode/
+opencode.jsonc
