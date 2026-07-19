@@ -5,16 +5,13 @@ stg/.env
 
 # Node (repo-root tooling)
 node_modules/
+pnpm-lock.yaml
 
-# Local project maps (machine paths — never commit)
+# Project maps — synced by platform-dna init (never hand-commit)
+platform-repos.json
+platform-repos.example.json
 platform-repos.local.json
 legacy-repos.local.json
-
-# Docs site build artifacts (source lives in docs/)
-docs/.vitepress/dist
-docs/.vitepress/.temp
-docs/public/openapi/openapi.yaml
-docs/public/swagger
 
 # Optional Kilo mirror (SSOT after init: .cursor/skills|rules|extracts)
 .kilo/skills/

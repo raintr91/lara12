@@ -61,4 +61,6 @@ codegenkit api-gen:dry --adapter=laravel -- --spec <path>
 codegenkit api-gen --adapter=laravel -- --spec <path>
 ```
 
-SSOT harness: `.cursor/` tại repo này (Platform DNA + Codegenkit + Processkit). Ignore/contract: xem `TODO-GITIGNORE.md`.
+SSOT harness: `.cursor/` tại repo này (Platform DNA + Codegenkit + Processkit).  
+Maps (`platform-repos*`) sync từ `platform-dna init` — không commit.  
+Ignore/contract: `TODO-GITIGNORE.md` · OpenAPI → `TODO-OPENAPI.md`.
